@@ -8,190 +8,228 @@ import {
   Pressable,
   ScrollView,
   SafeAreaView,
+  Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function Index() {
-  const router = useRouter ()
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.screen}>
 
         {/* CONTEÚDO */}
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.content}
-        >
+        <View style={styles.contentArea}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.content}
+          >
 
-          {/* CABEÇALHO */}
-          <View style={styles.header}>
-            <Text style={styles.title}>
-              Olá! <Text style={styles.wave}>👋</Text>
-            </Text>
+            {/* CABEÇALHO */}
+            <View style={styles.header}>
+              <Text style={styles.title}>
+                Olá! <Text style={styles.wave}>👋</Text>
+              </Text>
 
-            <Text style={styles.subtitle}>
-              Como podemos ajudar?
-            </Text>
-          </View>
+              <Text style={styles.subtitle}>
+                Como podemos ajudar?
+              </Text>
+            </View>
 
-          {/* BARRA DE PESQUISA */}
-          <View style={styles.searchContainer}>
-            <Ionicons
-              name="search-outline"
-              size={27}
-              color="#111"
-              style={styles.searchIcon}
-            />
+            {/* PESQUISA */}
+            <View style={styles.searchContainer}>
+              <Ionicons
+                name="search-outline"
+                size={26}
+                color="#111111"
+              />
 
-            <TextInput
-              placeholder="O que aconteceu?"
-              placeholderTextColor="#555"
-              style={styles.searchInput}
-            />
-          </View>
+              <TextInput
+                placeholder="O que aconteceu?"
+                placeholderTextColor="#555555"
+                style={styles.searchInput}
+              />
+            </View>
 
-          {/* CATEGORIAS */}
-          <View style={styles.categories}>
+            {/* CATEGORIAS */}
+            <View style={styles.categories}>
 
-            {/* FERIMENTOS */}
-            <Pressable 
-            style={styles.categoryCard}
-            onPress={() => router.navigate('/ferimentos')}>
-              <View style={styles.iconContainer}>
+              {/* FERIMENTOS */}
+              <Pressable
+                style={styles.categoryCard}
+                onPress={() => router.push('/ferimentos')}
+              >
+                <Image
+                source={require('../../../assets/icones/ferimentos.jpg')}
+                style={styles.categoryIcon}
+                resizeMode='contain'
+                />
+
+                <Text style={styles.categoryText}>
+                  Ferimentos
+                </Text>
+              </Pressable>
+
+              {/* QUEIMADURAS */}
+              <Pressable
+                style={styles.categoryCard}
+                onPress={() => router.push('/queimaduras')}
+              >
+                <MaterialCommunityIcons
+                  name="fire"
+                  size={76}
+                  color="#F06A62"
+                />
+
+                <Text style={styles.categoryText}>
+                  Queimaduras
+                </Text>
+              </Pressable>
+
+              {/* MEDICAMENTOS */}
+              <Pressable
+                style={styles.categoryCard}
+                onPress={() => router.push('/medicamentos')}
+              >
+                <MaterialCommunityIcons
+                  name="pill"
+                  size={76}
+                  color="#277BE8"
+                />
+
+                <Text style={styles.categoryText}>
+                  Medicamentos
+                </Text>
+              </Pressable>
+
+              {/* PICADAS */}
+              <Pressable
+                style={styles.categoryCard}
+                onPress={() => router.push('/picadas')}
+              >
+                <MaterialCommunityIcons
+                  name="bee"
+                  size={76}
+                  color="#111111"
+                />
+
+                <Text style={styles.categoryText}>
+                  Picadas
+                </Text>
+              </Pressable>
+
+            </View>
+
+            {/* EMERGÊNCIA */}
+            <Pressable
+              style={styles.emergencyButton}
+              onPress={() => router.push('/emergencia')}
+            >
+
+              {/* ÍCONE DE ALERTA */}
+              <View style={styles.emergencyIcon}>
+                <MaterialCommunityIcons
+                  name="alert-triangle"
+                  size={66}
+                  color="#000000"
+                />
+              </View>
+
+              {/* TEXTO */}
+              <View style={styles.emergencyTextContainer}>
+                <Text style={styles.emergencyTitle}>
+                  Emergência
+                </Text>
+
+                <Text style={styles.emergencySubtitle}>
+                  Precisa de ajuda imediata?
+                </Text>
+              </View>
+
+              {/* SETA */}
+              <View style={styles.arrowContainer}>
                 <Ionicons
-                  name="water"
-                  size={58}
+                  name="chevron-forward"
+                  size={30}
                   color="#E52335"
                 />
               </View>
 
-              <Text style={styles.categoryText}>
-                Ferimentos
-              </Text>
             </Pressable>
 
-            {/* QUEIMADURAS */}
-            <Pressable style={styles.categoryCard}>
-              <View style={styles.iconContainer}>
-                <Ionicons
-                  name="flame"
-                  size={62}
-                  color="#EF3B48"
-                />
-              </View>
-
-              <Text style={styles.categoryText}>
-                Queimaduras
-              </Text>
-            </Pressable>
-
-            {/* MEDICAMENTOS */}
-            <Pressable style={styles.categoryCard}>
-              <View style={styles.iconContainer}>
-                <View style={styles.pill}>
-                  <View style={styles.pillBlue} />
-                  <View style={styles.pillLight} />
-                </View>
-              </View>
-
-              <Text style={styles.categoryText}>
-                Medicamentos
-              </Text>
-            </Pressable>
-
-            {/* PICADAS */}
-            <Pressable style={styles.categoryCard}>
-              <View style={styles.iconContainer}>
-                <Text style={styles.bee}>
-                  🐝
-                </Text>
-              </View>
-
-              <Text style={styles.categoryText}>
-                Picadas
-              </Text>
-            </Pressable>
-
-          </View>
-
-          {/* BOTÃO DE EMERGÊNCIA */}
-          <Pressable style={styles.emergencyButton}>
-
-            <View style={styles.emergencyIcon}>
-              <Ionicons
-                name="warning"
-                size={40}
-                color="#111"
-              />
-            </View>
-
-            <View style={styles.emergencyTextContainer}>
-              <Text style={styles.emergencyTitle}>
-                Emergência
-              </Text>
-
-              <Text style={styles.emergencySubtitle}>
-                Precisa de ajuda imediata?
-              </Text>
-            </View>
-
-            <View style={styles.arrowContainer}>
-              <Ionicons
-                name="chevron-forward"
-                size={25}
-                color="#E52335"
-              />
-            </View>
-
-          </Pressable>
-
-        </ScrollView>
+          </ScrollView>
+        </View>
 
         {/* MENU INFERIOR */}
         <View style={styles.bottomMenu}>
 
-          <Pressable style={styles.menuItem}>
-            <Ionicons
-              name="home"
-              size={27}
-              color="#E52335"
-            />
+          {/* INÍCIO */}
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => router.push('/')}
+          >
+            <View style={styles.menuIcon}>
+              <Ionicons
+                name="home"
+                size={26}
+                color="#E52335"
+              />
+            </View>
 
             <Text style={[styles.menuText, styles.activeText]}>
               Início
             </Text>
           </Pressable>
 
-          <Pressable style={styles.menuItem}>
-            <Ionicons
-              name="search-outline"
-              size={27}
-              color="#777"
-            />
+          {/* BUSCAR */}
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => router.push('/buscar')}
+          >
+            <View style={styles.menuIcon}>
+              <Ionicons
+                name="search-outline"
+                size={26}
+                color="#777777"
+              />
+            </View>
 
             <Text style={styles.menuText}>
               Buscar
             </Text>
           </Pressable>
 
-          <Pressable style={styles.menuItem}>
-            <Ionicons
-              name="grid-outline"
-              size={27}
-              color="#777"
-            />
+          {/* CATEGORIAS */}
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => router.push('/categorias')}
+          >
+            <View style={styles.menuIcon}>
+              <MaterialCommunityIcons
+                name="view-grid-outline"
+                size={26}
+                color="#777777"
+              />
+            </View>
 
             <Text style={styles.menuText}>
               Categorias
             </Text>
           </Pressable>
 
-          <Pressable style={styles.menuItem}>
-            <Ionicons
-              name="person-outline"
-              size={27}
-              color="#777"
-            />
+          {/* PERFIL */}
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => router.push('/perfil')}
+          >
+            <View style={styles.menuIcon}>
+              <Ionicons
+                name="person-outline"
+                size={26}
+                color="#777777"
+              />
+            </View>
 
             <Text style={styles.menuText}>
               Perfil
@@ -206,6 +244,11 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
+categoryIcon: {
+  width: 90,
+  height: 90,
+},
+
   container: {
     flex: 1,
     backgroundColor: '#F2F7FC',
@@ -216,13 +259,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F7FC',
   },
 
+  contentArea: {
+    flex: 1,
+  },
+
   content: {
     paddingHorizontal: 24,
     paddingTop: 24,
-    paddingBottom: 25,
+    paddingBottom: 30,
   },
 
-  /* CABEÇALHO */
   header: {
     marginBottom: 18,
   },
@@ -245,7 +291,6 @@ const styles = StyleSheet.create({
     color: '#111111',
   },
 
-  /* PESQUISA */
   searchContainer: {
     height: 62,
     borderWidth: 1.5,
@@ -258,17 +303,13 @@ const styles = StyleSheet.create({
     marginBottom: 34,
   },
 
-  searchIcon: {
-    marginRight: 13,
-  },
-
   searchInput: {
     flex: 1,
+    marginLeft: 13,
     fontSize: 17,
     color: '#111111',
   },
 
-  /* CATEGORIAS */
   categories: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -279,72 +320,47 @@ const styles = StyleSheet.create({
   categoryCard: {
     width: '48%',
     height: 220,
+
     borderWidth: 1.5,
     borderColor: '#BDBDBD',
     borderRadius: 22,
+
     alignItems: 'center',
     justifyContent: 'center',
+
     backgroundColor: '#FFFFFF',
   },
 
-  iconContainer: {
-    height: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
   categoryText: {
-    marginTop: 10,
+    marginTop: 18,
     fontSize: 18,
     fontWeight: '700',
     color: '#111111',
   },
 
-  /* ÍCONE DE MEDICAMENTO */
-  pill: {
-    width: 67,
-    height: 35,
-    borderRadius: 20,
-    overflow: 'hidden',
-    flexDirection: 'row',
-    transform: [{ rotate: '-45deg' }],
-  },
-
-  pillBlue: {
-    flex: 1,
-    backgroundColor: '#1597E5',
-  },
-
-  pillLight: {
-    flex: 1,
-    backgroundColor: '#A9DDF7',
-  },
-
-  /* ABELHA */
-  bee: {
-    fontSize: 58,
-  },
-
-  /* EMERGÊNCIA */
   emergencyButton: {
     height: 125,
+
     backgroundColor: '#E52335',
     borderRadius: 18,
+
     marginTop: 34,
+
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
+
+    paddingHorizontal: 18,
   },
 
   emergencyIcon: {
-    width: 62,
+    width: 68,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   emergencyTextContainer: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 8,
   },
 
   emergencyTitle: {
@@ -361,36 +377,66 @@ const styles = StyleSheet.create({
   },
 
   arrowContainer: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+
     backgroundColor: '#FFFFFF',
+
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  /* MENU INFERIOR */
   bottomMenu: {
-    height: 86,
-    borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
+    height: 88,
+
+    marginHorizontal: 12,
+    marginBottom: 10,
+
+    borderRadius: 24,
+
     backgroundColor: '#FFFFFF',
+
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingBottom: 5,
+
+    paddingBottom: 3,
+
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+
+    elevation: 8,
   },
 
   menuItem: {
+    minWidth: 70,
+
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 70,
+  },
+
+  menuIcon: {
+    width: 38,
+    height: 32,
+
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    borderRadius: 16,
   },
 
   menuText: {
     marginTop: 5,
+
     fontSize: 12,
     fontWeight: '600',
+
     color: '#777777',
   },
 
