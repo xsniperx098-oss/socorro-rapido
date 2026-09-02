@@ -90,15 +90,29 @@ export default function Buscar() {
         {/* HOME */}
         <Pressable
           style={styles.menuItem}
-          onPress={() => router.push('/')}
+          onPress={() => router.replace('/tabs')}
         >
-          <Ionicons name="home-outline" size={24} color="#777" />
+          <View style={styles.menuIcon}>
+            <Ionicons
+              name="home-outline"
+              size={24}
+              color="#777"
+            />
+          </View>
+
           <Text style={styles.menuTexto}>Home</Text>
         </Pressable>
 
         {/* BUSCAR */}
         <Pressable style={styles.menuItem}>
-          <Ionicons name="search" size={25} color="#D71920" />
+          <View style={styles.menuIcon}>
+            <Ionicons
+              name="search"
+              size={25}
+              color="#E52335"
+            />
+          </View>
+
           <Text style={[styles.menuTexto, styles.menuAtivo]}>
             Buscar
           </Text>
@@ -109,7 +123,14 @@ export default function Buscar() {
           style={styles.menuItem}
           onPress={() => router.push('/categorias')}
         >
-          <Ionicons name="grid-outline" size={24} color="#777" />
+          <View style={styles.menuIcon}>
+            <Ionicons
+              name="grid-outline"
+              size={24}
+              color="#777"
+            />
+          </View>
+
           <Text style={styles.menuTexto}>Categoria</Text>
         </Pressable>
 
@@ -118,7 +139,14 @@ export default function Buscar() {
           style={styles.menuItem}
           onPress={() => router.push('/perfil')}
         >
-          <Ionicons name="person-outline" size={24} color="#777" />
+          <View style={styles.menuIcon}>
+            <Ionicons
+              name="person-outline"
+              size={24}
+              color="#777"
+            />
+          </View>
+
           <Text style={styles.menuTexto}>Perfil</Text>
         </Pressable>
 
@@ -131,7 +159,7 @@ export default function Buscar() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: '#F2F7FC',
     paddingTop: 20,
   },
 
@@ -212,33 +240,68 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
 
+  /* =========================
+     BARRA INFERIOR - IGUAL HOME
+     ========================= */
+
   menu: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 75,
-    backgroundColor: '#FFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    bottom: 10,
+    left: 12,
+    right: 12,
+
+    height: 88,
+
+    marginHorizontal: 0,
+
+    borderRadius: 24,
+
+    backgroundColor: '#F2F7FC',
+
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+
+    paddingBottom: 3,
+
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+
+    elevation: 8,
   },
 
   menuItem: {
+    minWidth: 70,
+
     alignItems: 'center',
     justifyContent: 'center',
   },
 
+  menuIcon: {
+    width: 38,
+    height: 32,
+
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    borderRadius: 16,
+  },
+
   menuTexto: {
-    fontSize: 11,
-    color: '#777',
-    marginTop: 3,
+    marginTop: 5,
+
+    fontSize: 12,
+    fontWeight: '600',
+
+    color: '#777777',
   },
 
   menuAtivo: {
-    color: '#D71920',
-    fontWeight: '600',
+    color: '#E52335',
   },
 });
