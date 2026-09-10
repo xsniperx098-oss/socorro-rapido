@@ -61,9 +61,9 @@ export default function Index() {
                 onPress={() => router.push('/ferimentos')}
               >
                 <Image
-                source={require('../../../assets/icones/ferimentos.png')}
-                style={styles.categoryIcon}
-                resizeMode='contain'
+                  source={require('../../../assets/icones/ferimentos.png')}
+                  style={styles.categoryIcon}
+                  resizeMode="contain"
                 />
 
                 <Text style={styles.categoryText}>
@@ -76,12 +76,11 @@ export default function Index() {
                 style={styles.categoryCard}
                 onPress={() => router.push('/queimaduras')}
               >
-               <Image
-                source={require('../../../assets/icones/queimaduras.png')}
-                style={styles.categoryIcon}
-                resizeMode='contain'
+                <Image
+                  source={require('../../../assets/icones/queimaduras.png')}
+                  style={styles.categoryIcon}
+                  resizeMode="contain"
                 />
-
 
                 <Text style={styles.categoryText}>
                   Queimaduras
@@ -93,12 +92,11 @@ export default function Index() {
                 style={styles.categoryCard}
                 onPress={() => router.push('/medicamentos')}
               >
-                 <Image
-                source={require('../../../assets/icones/medicamentos.png')}
-                style={styles.categoryIcon}
-                resizeMode='contain'
+                <Image
+                  source={require('../../../assets/icones/medicamentos.png')}
+                  style={styles.categoryIcon}
+                  resizeMode="contain"
                 />
-
 
                 <Text style={styles.categoryText}>
                   Medicamentos
@@ -111,11 +109,10 @@ export default function Index() {
                 onPress={() => router.push('/picadas')}
               >
                 <Image
-                source={require('../../../assets/icones/picadas.png')}
-                style={styles.categoryIcon}
-                resizeMode='contain'
+                  source={require('../../../assets/icones/picadas.png')}
+                  style={styles.categoryIcon}
+                  resizeMode="contain"
                 />
-
 
                 <Text style={styles.categoryText}>
                   Picadas
@@ -133,11 +130,9 @@ export default function Index() {
               <Image
                 source={require('../../../assets/icones/emergencia.png')}
                 style={styles.categoryIcon}
-                resizeMode='contain'
-                />
+                resizeMode="contain"
+              />
 
-
-              {/* TEXTO */}
               <View style={styles.emergencyTextContainer}>
                 <Text style={styles.emergencyTitle}>
                   Emergência
@@ -148,7 +143,6 @@ export default function Index() {
                 </Text>
               </View>
 
-              {/* SETA */}
               <View style={styles.arrowContainer}>
                 <Ionicons
                   name="chevron-forward"
@@ -183,24 +177,6 @@ export default function Index() {
             </Text>
           </Pressable>
 
-          {/* BUSCAR */}
-          <Pressable
-            style={styles.menuItem}
-            onPress={() => router.push('/buscar')}
-          >
-            <View style={styles.menuIcon}>
-              <Ionicons
-                name="search-outline"
-                size={26}
-                color="#777777"
-              />
-            </View>
-
-            <Text style={styles.menuText}>
-              Buscar
-            </Text>
-          </Pressable>
-
           {/* CATEGORIAS */}
           <Pressable
             style={styles.menuItem}
@@ -219,21 +195,21 @@ export default function Index() {
             </Text>
           </Pressable>
 
-          {/* PERFIL */}
+          {/* CONFIGURACAO */}
           <Pressable
             style={styles.menuItem}
-            onPress={() => router.push('/perfil')}
+            onPress={() => router.push('/configuracao')}
           >
             <View style={styles.menuIcon}>
               <Ionicons
-                name="person-outline"
+            name="settings-outline"
                 size={26}
                 color="#777777"
               />
             </View>
 
             <Text style={styles.menuText}>
-              Perfil
+              configuração
             </Text>
           </Pressable>
 
@@ -245,10 +221,10 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-categoryIcon: {
-  width: 90,
-  height: 90,
-},
+  categoryIcon: {
+    width: 90,
+    height: 90,
+  },
 
   container: {
     flex: 1,
@@ -445,3 +421,4 @@ categoryIcon: {
     color: '#E52335',
   },
 });
+
