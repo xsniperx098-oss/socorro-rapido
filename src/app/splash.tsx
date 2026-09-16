@@ -1,54 +1,77 @@
+
 import React, { useEffect, useRef } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   Animated,
   Dimensions,
   Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-
-const { width } = Dimensions.get('window');
+import { supabase } from '../lib/supabase';
 
 export default function Splash() {
   const router = useRouter();
-  const ambulanceX = useRef(new Animated.Value(-100)).current;
+
+  const position = useRef(new Animated.Value(-120)).current;
+  const screenWidth = Dimensions.get('window').width;
 
   useEffect(() => {
-    Animated.timing(ambulanceX, {
-      toValue: width,
-      duration: 2000,
-      useNativeDriver: true,
-    }).start(() => {
-      // Quando a ambulância chegar ao final
-      router.replace('/login');
-    });
+    async function verificarLogin() {
+      const { data } = await supabase.auth.getSession();
+
+      Animated.timing(position, {
+        toValue: screenWidth + 120,
+        duration: 2000,
+        useNativeDriver: true,
+      }).start(() => {
+        if (data.session) {
+          router.replace('/tabs');
+        } else {
+          router.replace('/login');
+        }
+      });
+    }
+
+    verificarLogin();
   }, []);
 
   return (
     <View style={styles.container}>
 
-      {/* LOGO */}
+      {/* LOGO PRINCIPAL */}
       <Image
         source={require('../../assets/images/logo.png')}
         style={styles.logo}
         resizeMode="contain"
       />
 
-      {/* AMBULÂNCIA */}
-      <Animated.Text
+      {/* AMBULÂNCIA ANIMADA */}
+      <Animated.View
         style={[
-          styles.ambulance,
+          styles.ambulanceContainer,
           {
-         transform: [{ translateX: ambulanceX }, { scaleX: -1 }],
+            transform: [
+              { translateX: position },
+              { scaleX: -1 },
+            ],
           },
         ]}
       >
-        🚑
-      </Animated.Text>
+        <Text style={styles.ambulance}>
+          🚑
+        </Text>
+      </Animated.View>
 
-      {/* LINHA */}
-      <View style={styles.line} />
+      {/* NOME DO APP */}
+      <Text style={styles.title}>
+        Socorro Rápido
+      </Text>
+
+      <Text style={styles.subtitle}>
+        Cuidar também é agir rápido
+      </Text>
 
     </View>
   );
@@ -57,28 +80,36 @@ export default function Splash() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F2F7FC',
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   logo: {
-    width: 230,
-    height: 230,
+    width: 210,
+    height: 210,
+    marginBottom: 20,
+  },
+
+  ambulanceContainer: {
+    position: 'absolute',
+    bottom: 150,
+    left: -120,
   },
 
   ambulance: {
-    position: 'absolute',
-    bottom: 25,
-    left: 0,
-    fontSize: 45,
+    fontSize: 55,
   },
 
-  line: {
-    position: 'absolute',
-    bottom: 20,
-    width: '100%',
-    height: 2,
-    backgroundColor: '#BDBDBD',
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#E52335',
+  },
+
+  subtitle: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#777777',
   },
 });

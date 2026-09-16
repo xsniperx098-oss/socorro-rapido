@@ -6,6 +6,9 @@ import {
   TextInput,
   Pressable,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -52,13 +55,18 @@ export default function Cadastro() {
     try {
       setCarregando(true);
 
+      const emailFormatado = email.trim().toLowerCase();
+      const nomeFormatado = nome.trim();
+      const celularFormatado = celular.trim();
+
+      // 1. Criar usuário no Authentication
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
+        email: emailFormatado,
         password: senha,
         options: {
           data: {
-            nome: nome.trim(),
-            celular: celular.trim(),
+            nome: nomeFormatado,
+            celular: celularFormatado,
           },
         },
       });
@@ -68,19 +76,57 @@ export default function Cadastro() {
         return;
       }
 
-      if (data.user) {
+      if (!data.user) {
         Alert.alert(
-          'Conta criada!',
-          'Sua conta foi criada com sucesso.',
-          [
-            {
-              text: 'OK',
-              onPress: () => router.replace('/login'),
-            },
-          ]
+          'Erro',
+          'O usuário não foi criado.'
         );
+        return;
       }
+
+      // 2. Verificar se o usuário está autenticado
+      if (!data.session) {
+        Alert.alert(
+          'Atenção',
+          'A conta foi criada, mas não foi possível iniciar a sessão.'
+        );
+        return;
+      }
+
+      // 3. Salvar os dados na tabela perfis
+      const { error: perfilError } = await supabase
+        .from('perfis')
+        .insert({
+          id: data.user.id,
+          nome: nomeFormatado,
+          email: emailFormatado,
+        });
+
+      if (perfilError) {
+        console.log('ERRO AO SALVAR PERFIL:', perfilError);
+
+        Alert.alert(
+          'Erro ao salvar perfil',
+          perfilError.message
+        );
+        return;
+      }
+
+      // 4. Tudo deu certo
+      Alert.alert(
+        'Conta criada!',
+        'Sua conta foi criada e seus dados foram salvos.',
+        [
+          {
+            text: 'OK',
+            onPress: () => router.replace('/login'),
+          },
+        ]
+      );
+
     } catch (error) {
+      console.log('ERRO GERAL:', error);
+
       Alert.alert(
         'Erro',
         'Não foi possível criar sua conta.'
@@ -91,162 +137,177 @@ export default function Cadastro() {
   };
 
   return (
-    <View style={styles.container}>
-
-      {/* TÍTULO */}
-      <Text style={styles.title}>
-        Cria conta
-      </Text>
-
-      <Text style={styles.subtitle}>
-        Preencha seus dados para{'\n'}criar sua conta
-      </Text>
-
-      {/* NOME */}
-      <View style={styles.inputContainer}>
-        <Ionicons
-          name="person-outline"
-          size={18}
-          color="#555"
-        />
-
-        <TextInput
-          placeholder="Nome completo"
-          placeholderTextColor="#777"
-          style={styles.input}
-          value={nome}
-          onChangeText={setNome}
-        />
-      </View>
-
-      {/* E-MAIL */}
-      <View style={styles.inputContainer}>
-        <Ionicons
-          name="mail-outline"
-          size={18}
-          color="#555"
-        />
-
-        <TextInput
-          placeholder="E-mail"
-          placeholderTextColor="#777"
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
-
-      {/* CELULAR */}
-      <View style={styles.inputContainer}>
-        <Ionicons
-          name="call-outline"
-          size={18}
-          color="#555"
-        />
-
-        <TextInput
-          placeholder="Celular"
-          placeholderTextColor="#777"
-          style={styles.input}
-          value={celular}
-          onChangeText={setCelular}
-          keyboardType="phone-pad"
-        />
-      </View>
-
-      {/* SENHA */}
-      <View style={styles.inputContainer}>
-        <Ionicons
-          name="lock-closed-outline"
-          size={18}
-          color="#555"
-        />
-
-        <TextInput
-          placeholder="Senha"
-          placeholderTextColor="#777"
-          style={styles.input}
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry
-        />
-      </View>
-
-      {/* CONFIRMAR SENHA */}
-      <View style={styles.inputContainer}>
-        <Ionicons
-          name="lock-closed-outline"
-          size={18}
-          color="#555"
-        />
-
-        <TextInput
-          placeholder="Confirmar senha"
-          placeholderTextColor="#777"
-          style={styles.input}
-          value={confirmarSenha}
-          onChangeText={setConfirmarSenha}
-          secureTextEntry
-        />
-      </View>
-
-      {/* TERMOS */}
-      <Pressable
-        style={styles.termsContainer}
-        onPress={() => setAceitouTermos(!aceitouTermos)}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <View
-          style={[
-            styles.checkbox,
-            aceitouTermos && styles.checkboxChecked,
-          ]}
-        >
-          {aceitouTermos && (
-            <Ionicons
-              name="checkmark"
-              size={14}
-              color="#FFFFFF"
-            />
-          )}
+        {/* CABEÇALHO */}
+        <View style={styles.header}>
+          <Text style={styles.title}>
+            Crie sua conta
+          </Text>
+
+          <Text style={styles.subtitle}>
+            Preencha seus dados para{'\n'}
+            criar sua conta no Socorro Rápido
+          </Text>
         </View>
 
-        <Text style={styles.termsText}>
-          Eu aceito os termos e condições
-        </Text>
-      </Pressable>
+        {/* FORMULÁRIO */}
+        <View style={styles.form}>
 
-      {/* CRIAR CONTA */}
-      <Pressable
-        style={[
-          styles.button,
-          carregando && styles.buttonDisabled,
-        ]}
-        onPress={criarConta}
-        disabled={carregando}
-      >
-        <Text style={styles.buttonText}>
-          {carregando ? 'CRIANDO...' : 'CRIAR CONTA'}
-        </Text>
-      </Pressable>
+          {/* NOME */}
+          <View style={styles.inputContainer}>
+            <Ionicons
+              name="person-outline"
+              size={21}
+              color="#555"
+            />
 
-      {/* JÁ TEM CONTA */}
-      <View style={styles.loginContainer}>
-        <Text style={styles.loginText}>
-          Já tem uma conta?
-        </Text>
+            <TextInput
+              placeholder="Nome completo"
+              placeholderTextColor="#777"
+              style={styles.input}
+              value={nome}
+              onChangeText={setNome}
+            />
+          </View>
 
-        <Pressable
-          onPress={() => router.replace('/login')}
-        >
-          <Text style={styles.loginLink}>
-            Entrar
-          </Text>
-        </Pressable>
-      </View>
+          {/* E-MAIL */}
+          <View style={styles.inputContainer}>
+            <Ionicons
+              name="mail-outline"
+              size={21}
+              color="#555"
+            />
 
-    </View>
+            <TextInput
+              placeholder="E-mail"
+              placeholderTextColor="#777"
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          {/* CELULAR */}
+          <View style={styles.inputContainer}>
+            <Ionicons
+              name="call-outline"
+              size={21}
+              color="#555"
+            />
+
+            <TextInput
+              placeholder="Celular"
+              placeholderTextColor="#777"
+              style={styles.input}
+              value={celular}
+              onChangeText={setCelular}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          {/* SENHA */}
+          <View style={styles.inputContainer}>
+            <Ionicons
+              name="lock-closed-outline"
+              size={21}
+              color="#555"
+            />
+
+            <TextInput
+              placeholder="Senha"
+              placeholderTextColor="#777"
+              style={styles.input}
+              value={senha}
+              onChangeText={setSenha}
+              secureTextEntry
+            />
+          </View>
+
+          {/* CONFIRMAR SENHA */}
+          <View style={styles.inputContainer}>
+            <Ionicons
+              name="lock-closed-outline"
+              size={21}
+              color="#555"
+            />
+
+            <TextInput
+              placeholder="Confirmar senha"
+              placeholderTextColor="#777"
+              style={styles.input}
+              value={confirmarSenha}
+              onChangeText={setConfirmarSenha}
+              secureTextEntry
+            />
+          </View>
+
+          {/* TERMOS */}
+          <Pressable
+            style={styles.termsContainer}
+            onPress={() => setAceitouTermos(!aceitouTermos)}
+          >
+            <View
+              style={[
+                styles.checkbox,
+                aceitouTermos && styles.checkboxChecked,
+              ]}
+            >
+              {aceitouTermos && (
+                <Ionicons
+                  name="checkmark"
+                  size={16}
+                  color="#FFFFFF"
+                />
+              )}
+            </View>
+
+            <Text style={styles.termsText}>
+              Eu aceito os termos e condições
+            </Text>
+          </Pressable>
+
+          {/* CRIAR CONTA */}
+          <Pressable
+            style={[
+              styles.button,
+              carregando && styles.buttonDisabled,
+            ]}
+            onPress={criarConta}
+            disabled={carregando}
+          >
+            <Text style={styles.buttonText}>
+              {carregando ? 'CRIANDO...' : 'CRIAR CONTA'}
+            </Text>
+          </Pressable>
+
+          {/* JÁ TEM CONTA */}
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>
+              Já tem uma conta?
+            </Text>
+
+            <Pressable
+              onPress={() => router.replace('/login')}
+            >
+              <Text style={styles.loginLink}>
+                Entrar
+              </Text>
+            </Pressable>
+          </View>
+
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -254,63 +315,75 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    alignItems: 'center',
+  },
+
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
-    paddingHorizontal: 25,
+    paddingHorizontal: 28,
+    paddingVertical: 45,
+  },
+
+  header: {
+    alignItems: 'center',
+    marginBottom: 35,
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 29,
     fontWeight: 'bold',
     color: '#111111',
-    marginBottom: 8,
+    marginBottom: 12,
   },
 
   subtitle: {
-    fontSize: 10,
+    fontSize: 13,
     color: '#555555',
     textAlign: 'center',
-    lineHeight: 15,
-    marginBottom: 25,
+    lineHeight: 20,
+  },
+
+  form: {
+    width: '100%',
   },
 
   inputContainer: {
     width: '100%',
-    height: 40,
+    height: 55,
     borderWidth: 1,
     borderColor: '#BDBDBD',
-    borderRadius: 5,
+    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    marginBottom: 12,
+    paddingHorizontal: 14,
+    marginBottom: 17,
   },
 
   input: {
     flex: 1,
-    height: 40,
-    fontSize: 11,
+    height: 55,
+    fontSize: 15,
     color: '#111111',
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
   },
 
   termsContainer: {
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 3,
-    marginBottom: 20,
+    marginTop: 4,
+    marginBottom: 28,
   },
 
   checkbox: {
-    width: 18,
-    height: 18,
+    width: 22,
+    height: 22,
     borderWidth: 1,
     borderColor: '#999999',
-    borderRadius: 3,
+    borderRadius: 5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 8,
+    marginRight: 10,
   },
 
   checkboxChecked: {
@@ -319,15 +392,15 @@ const styles = StyleSheet.create({
   },
 
   termsText: {
-    fontSize: 9,
+    fontSize: 12,
     color: '#555555',
   },
 
   button: {
     width: '100%',
-    height: 40,
+    height: 55,
     backgroundColor: '#E00000',
-    borderRadius: 5,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -338,24 +411,25 @@ const styles = StyleSheet.create({
 
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 
   loginContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 18,
+    justifyContent: 'center',
+    marginTop: 27,
   },
 
   loginText: {
-    fontSize: 9,
+    fontSize: 12,
     color: '#555555',
-    marginRight: 4,
+    marginRight: 5,
   },
 
   loginLink: {
-    fontSize: 9,
+    fontSize: 12,
     color: '#E00000',
     fontWeight: 'bold',
   },

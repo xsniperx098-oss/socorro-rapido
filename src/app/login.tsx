@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -7,36 +8,46 @@ import {
   Pressable,
   Image,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// E-MAIL E SENHA CORRETOS
-const EMAIL_CORRETO = 'teste@gmail.com';
-const SENHA_CORRETA = '123456';
+import { supabase } from '../lib/supabase';
+import * as SecureStore from 'expo-secure-store';
 
 export default function Login() {
   const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
-  // CARREGAR O E-MAIL SALVO
+  // CARREGAR E-MAIL E SENHA SALVOS
   useEffect(() => {
-    const carregarEmail = async () => {
+    const carregarDados = async () => {
       try {
-        const emailSalvo = await AsyncStorage.getItem('emailSalvo');
+        const emailSalvo =
+          await AsyncStorage.getItem('emailSalvo');
+
+        const senhaSalva =
+          await SecureStore.getItemAsync('senhaSalva');
 
         if (emailSalvo) {
           setEmail(emailSalvo);
         }
+
+        if (senhaSalva) {
+          setSenha(senhaSalva);
+        }
       } catch (error) {
-        console.log('Erro ao carregar e-mail:', error);
+        console.log('Erro ao carregar dados:', error);
       }
     };
 
-    carregarEmail();
+    carregarDados();
   }, []);
 
   // FAZER LOGIN
@@ -49,138 +60,227 @@ export default function Login() {
       return;
     }
 
-    if (
-      email.trim().toLowerCase() === EMAIL_CORRETO.toLowerCase() &&
-      senha === SENHA_CORRETA
-    ) {
-      try {
-        // Salva o primeiro e-mail usado corretamente
-        const emailJaSalvo = await AsyncStorage.getItem('emailSalvo');
+    try {
+      setCarregando(true);
 
-        if (!emailJaSalvo) {
-          await AsyncStorage.setItem(
-            'emailSalvo',
-            email.trim()
-          );
-        }
+      const emailFormatado = email.trim().toLowerCase();
 
-        // Vai para o aplicativo
-        router.replace('/tabs');
+      // LOGIN REAL PELO SUPABASE
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email: emailFormatado,
+          password: senha,
+        });
 
-      } catch (error) {
-        console.log('Erro ao salvar e-mail:', error);
-
-        // Mesmo se houver erro ao salvar,
-        // permite continuar para o aplicativo
-        router.replace('/tabs');
+      if (error) {
+        Alert.alert(
+          'Login inválido',
+          'E-mail ou senha incorretos.'
+        );
+        return;
       }
 
-    } else {
-      Alert.alert(
-        'Login inválido',
-        'E-mail ou senha incorretos.'
+      if (!data.user) {
+        Alert.alert(
+          'Erro',
+          'Não foi possível entrar na conta.'
+        );
+        return;
+      }
+
+      // SALVAR E-MAIL PARA O PRÓXIMO LOGIN
+      await AsyncStorage.setItem(
+        'emailSalvo',
+        emailFormatado
       );
+
+      // SALVAR SENHA NO ARMAZENAMENTO SEGURO
+      await SecureStore.setItemAsync(
+        'senhaSalva',
+        senha
+      );
+
+      // ENTRAR NO APP
+      router.replace('/tabs');
+
+    } catch (error) {
+      console.log('Erro ao fazer login:', error);
+
+      Alert.alert(
+        'Erro',
+        'Não foi possível realizar o login.'
+      );
+    } finally {
+      setCarregando(false);
     }
   };
 
+  // BOTÕES DE LOGIN SOCIAL
+  const loginSocial = (rede: string) => {
+    Alert.alert(
+      `${rede}`,
+      `O login com ${rede} ainda será configurado.`
+    );
+  };
+
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
 
-      {/* LOGO */}
-      <Image
-        source={require('../../assets/images/logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+        {/* LOGO */}
+        <Image
+          source={require('../../assets/images/logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
-      {/* TEXTO */}
-      <Text style={styles.subtitle}>
-        Faça login para continuar
-      </Text>
+        {/* TEXTO */}
+        <Text style={styles.subtitle}>
+          Faça login para continuar
+        </Text>
 
-      {/* FORMULÁRIO */}
-      <View style={styles.form}>
+        {/* FORMULÁRIO */}
+        <View style={styles.form}>
 
-        {/* E-MAIL */}
-        <View style={styles.inputContainer}>
-          <Ionicons
-            name="mail-outline"
-            size={18}
-            color="#555"
-          />
+          {/* E-MAIL */}
+          <View style={styles.inputContainer}>
+            <Ionicons
+              name="mail-outline"
+              size={21}
+              color="#555"
+            />
 
-          <TextInput
-            placeholder="E-mail"
-            placeholderTextColor="#777"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+            <TextInput
+              placeholder="E-mail"
+              placeholderTextColor="#777"
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          {/* SENHA */}
+          <View style={styles.inputContainer}>
+            <Ionicons
+              name="lock-closed-outline"
+              size={21}
+              color="#555"
+            />
+
+            <TextInput
+              placeholder="Senha"
+              placeholderTextColor="#777"
+              style={styles.input}
+              value={senha}
+              onChangeText={setSenha}
+              secureTextEntry
+            />
+          </View>
+
+          {/* ENTRAR */}
+          <Pressable
+            style={[
+              styles.buttonEntrar,
+              carregando && styles.buttonDisabled,
+            ]}
+            onPress={fazerLogin}
+            disabled={carregando}
+          >
+            <Text style={styles.buttonEntrarText}>
+              {carregando ? 'ENTRANDO...' : 'ENTRAR'}
+            </Text>
+          </Pressable>
+
+          {/* OU */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.line} />
+
+            <Text style={styles.ou}>
+              ou
+            </Text>
+
+            <View style={styles.line} />
+          </View>
+
+          {/* CRIAR CONTA */}
+          <Pressable
+            style={styles.buttonCadastro}
+            onPress={() => router.push('/cadastro')}
+          >
+            <Text style={styles.buttonCadastroText}>
+              Criar conta
+            </Text>
+          </Pressable>
+
+          {/* ESQUECI SENHA */}
+          <Pressable
+            onPress={() => router.push('/esqueci-senha')}
+          >
+            <Text style={styles.forgotPassword}>
+              Esqueci minha senha
+            </Text>
+          </Pressable>
+
+          {/* LOGIN COM REDES SOCIAIS */}
+          <View style={styles.socialContainer}>
+            <Text style={styles.socialText}>
+            
+            </Text>
+
+            <View style={styles.socialButtons}>
+
+              {/* GOOGLE */}
+              <Pressable
+                style={styles.socialButton}
+                onPress={() => loginSocial('Google')}
+              >
+                <Ionicons
+                  name="logo-google"
+                  size={25}
+                  color="#DB4437"
+                />
+              </Pressable>
+
+              {/* FACEBOOK */}
+              <Pressable
+                style={styles.socialButton}
+                onPress={() => loginSocial('Facebook')}
+              >
+                <Ionicons
+                  name="logo-facebook"
+                  size={25}
+                  color="#1877F2"
+                />
+              </Pressable>
+
+              {/* APPLE */}
+              <Pressable
+                style={styles.socialButton}
+                onPress={() => loginSocial('Apple')}
+              >
+                <Ionicons
+                  name="logo-apple"
+                  size={25}
+                  color="#111111"
+                />
+              </Pressable>
+
+            </View>
+          </View>
+
         </View>
 
-        {/* SENHA */}
-        <View style={styles.inputContainer}>
-          <Ionicons
-            name="lock-closed-outline"
-            size={18}
-            color="#555"
-          />
-
-          <TextInput
-            placeholder="Senha"
-            placeholderTextColor="#777"
-            style={styles.input}
-            value={senha}
-            onChangeText={setSenha}
-            secureTextEntry
-          />
-        </View>
-
-        {/* ENTRAR */}
-        <Pressable
-          style={styles.buttonEntrar}
-          onPress={fazerLogin}
-        >
-          <Text style={styles.buttonEntrarText}>
-            ENTRAR
-          </Text>
-        </Pressable>
-
-        {/* OU */}
-        <View style={styles.dividerContainer}>
-          <View style={styles.line} />
-
-          <Text style={styles.ou}>
-            ou
-          </Text>
-
-          <View style={styles.line} />
-        </View>
-
-        {/* CRIAR CONTA */}
-        <Pressable
-          style={styles.buttonCadastro}
-          onPress={() => router.push('/cadastro')}
-        >
-          <Text style={styles.buttonCadastroText}>
-            Criar conta
-          </Text>
-        </Pressable>
-
-        {/* ESQUECI SENHA */}
-        <Pressable
-          onPress={() => router.push('/esqueci-senha')}
-        >
-          <Text style={styles.forgotPassword}>
-            Esqueci minha senha
-          </Text>
-        </Pressable>
-
-      </View>
-
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -188,60 +288,70 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    alignItems: 'center',
+  },
+
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 45,
   },
 
   logo: {
-    width: 160,
-    height: 160,
-    marginBottom: 12,
+    width: 210,
+    height: 210,
+    alignSelf: 'center',
+    marginBottom: 15,
   },
 
   subtitle: {
-    fontSize: 10,
+    fontSize: 13,
     color: '#111111',
-    marginBottom: 25,
+    textAlign: 'center',
+    marginBottom: 35,
   },
 
   form: {
-    width: '88%',
-    alignItems: 'center',
+    width: '100%',
   },
 
   inputContainer: {
     width: '100%',
-    height: 40,
+    height: 55,
     borderWidth: 1,
     borderColor: '#BDBDBD',
-    borderRadius: 5,
+    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    marginBottom: 14,
+    paddingHorizontal: 14,
+    marginBottom: 17,
   },
 
   input: {
     flex: 1,
-    height: 40,
-    fontSize: 12,
-    paddingHorizontal: 8,
+    height: 55,
+    fontSize: 15,
+    paddingHorizontal: 12,
     color: '#111111',
   },
 
   buttonEntrar: {
     width: '100%',
-    height: 40,
+    height: 55,
     backgroundColor: '#E00000',
-    borderRadius: 5,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
   },
 
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+
   buttonEntrarText: {
     color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 
@@ -249,7 +359,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 25,
   },
 
   line: {
@@ -259,31 +369,60 @@ const styles = StyleSheet.create({
   },
 
   ou: {
-    fontSize: 9,
+    fontSize: 12,
     color: '#777',
-    marginHorizontal: 10,
+    marginHorizontal: 12,
   },
 
   buttonCadastro: {
     width: '100%',
-    height: 40,
+    height: 55,
     borderWidth: 1,
     borderColor: '#BDBDBD',
-    borderRadius: 5,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   buttonCadastroText: {
     color: '#111111',
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: 'bold',
   },
 
   forgotPassword: {
     color: '#E00000',
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: 'bold',
-    marginTop: 18,
+    marginTop: 22,
+    textAlign: 'center',
+  },
+
+  socialContainer: {
+    alignItems: 'center',
+    marginTop: 30,
+  },
+
+  socialText: {
+    fontSize: 12,
+    color: '#777777',
+    marginBottom: 15,
+  },
+
+  socialButtons: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 14,
+  },
+
+  socialButton: {
+    width: 58,
+    height: 58,
+    borderWidth: 1,
+    borderColor: '#D0D0D0',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
   },
 });

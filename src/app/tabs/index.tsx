@@ -54,7 +54,7 @@ export default function Index() {
 
             {/* CATEGORIAS */}
             <View style={styles.categories}>
-
+          
               {/* FERIMENTOS */}
               <Pressable
                 style={styles.categoryCard}
@@ -202,7 +202,7 @@ export default function Index() {
           >
             <View style={styles.menuIcon}>
               <Ionicons
-            name="settings-outline"
+                name="settings-outline"
                 size={26}
                 color="#777777"
               />
