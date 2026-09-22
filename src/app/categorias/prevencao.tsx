@@ -121,7 +121,7 @@ export default function Prevencao() {
           <View style={styles.item}>
             <View style={styles.iconeItem}>
               <MaterialCommunityIcons
-                name="home-check-outline"
+              name="home-outline"
                 size={27}
                 color="#269653"
               />

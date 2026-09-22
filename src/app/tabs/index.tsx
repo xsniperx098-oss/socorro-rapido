@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,57 @@ import Svg, { Path } from 'react-native-svg';
 export default function Index() {
   const router = useRouter();
 
+  // =========================
+  // BUSCA
+  // =========================
+
+  const [textoBusca, setTextoBusca] = useState('');
+
+  const resultados = useMemo(() => {
+    const texto = textoBusca.trim().toLowerCase();
+
+    if (!texto) {
+      return [];
+    }
+
+    const itens = [
+      {
+        titulo: 'Ferimentos',
+        descricao: 'Cuidados para cortes, machucados e ferimentos.',
+        rota: '/ferimentos',
+        icone: 'medical-bag' as const,
+      },
+      {
+        titulo: 'Queimaduras',
+        descricao: 'Orientações para situações envolvendo queimaduras.',
+        rota: '/queimaduras',
+        icone: 'fire' as const,
+      },
+      {
+        titulo: 'Medicamentos',
+        descricao: 'Informações e cuidados relacionados a medicamentos.',
+        rota: '/medicamentos',
+        icone: 'pill' as const,
+      },
+      {
+        titulo: 'Picadas',
+        descricao: 'Cuidados em situações envolvendo picadas.',
+        rota: '/picadas',
+        icone: 'bug-outline' as const,
+      },
+    ];
+
+    return itens.filter((item) => {
+      const titulo = item.titulo.toLowerCase();
+      const descricao = item.descricao.toLowerCase();
+
+      return (
+        titulo.includes(texto) ||
+        descricao.includes(texto)
+      );
+    });
+  }, [textoBusca]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.screen}>
@@ -27,11 +78,11 @@ export default function Index() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
         >
 
           {/* =========================
               TOPO VERMELHO + ONDA + MALETA
-              AGORA ROLA JUNTO COM A TELA
           ========================= */}
 
           <View style={styles.topSection}>
@@ -68,7 +119,7 @@ export default function Index() {
           </View>
 
           {/* =========================
-              TEXTO NA PARTE BRANCA
+              TEXTO
           ========================= */}
 
           <View style={styles.header}>
@@ -99,6 +150,9 @@ export default function Index() {
               placeholder="O que aconteceu?"
               placeholderTextColor="#8799AA"
               style={styles.searchInput}
+              value={textoBusca}
+              onChangeText={setTextoBusca}
+              returnKeyType="search"
             />
 
             <Ionicons
@@ -110,139 +164,210 @@ export default function Index() {
           </View>
 
           {/* =========================
+              RESULTADOS DA BUSCA
+          ========================= */}
+
+          {textoBusca.trim().length > 0 && (
+            <View style={styles.resultadosContainer}>
+
+              <Text style={styles.resultadosTitulo}>
+                Resultados
+              </Text>
+
+              {resultados.length > 0 ? (
+                resultados.map((item) => (
+                  <Pressable
+                    key={item.titulo}
+                    style={styles.resultadoCard}
+                    onPress={() => router.push(item.rota as any)}
+                  >
+
+                    <View style={styles.resultadoIcone}>
+                      <MaterialCommunityIcons
+                        name={item.icone}
+                        size={25}
+                        color="#E52335"
+                      />
+                    </View>
+
+                    <View style={styles.resultadoTexto}>
+                      <Text style={styles.resultadoTitulo}>
+                        {item.titulo}
+                      </Text>
+
+                      <Text style={styles.resultadoDescricao}>
+                        {item.descricao}
+                      </Text>
+                    </View>
+
+                    <Ionicons
+                      name="chevron-forward"
+                      size={22}
+                      color="#8799AA"
+                    />
+
+                  </Pressable>
+                ))
+              ) : (
+                <View style={styles.semResultado}>
+                  <Ionicons
+                    name="search-outline"
+                    size={34}
+                    color="#AAB5C1"
+                  />
+
+                  <Text style={styles.semResultadoTitulo}>
+                    Nenhum resultado encontrado
+                  </Text>
+
+                  <Text style={styles.semResultadoDescricao}>
+                    Tente pesquisar por outro termo.
+                  </Text>
+                </View>
+              )}
+
+            </View>
+          )}
+
+          {/* =========================
               CATEGORIAS
           ========================= */}
 
-          <View style={styles.categories}>
+          {textoBusca.trim().length === 0 && (
+            <>
+              <View style={styles.categories}>
 
-            {/* FERIMENTOS */}
+                {/* FERIMENTOS */}
 
-            <Pressable
-              style={[
-                styles.categoryCard,
-                styles.ferimentosCard,
-              ]}
-              onPress={() => router.push('/ferimentos')}
-            >
+                <Pressable
+                  style={[
+                    styles.categoryCard,
+                    styles.ferimentosCard,
+                  ]}
+                  onPress={() => router.push('/ferimentos')}
+                >
 
-              <Image
-                source={require('../../../assets/icones/ferimentos.png')}
-                style={styles.categoryIcon}
-                resizeMode="contain"
-              />
+                  <Image
+                    source={require('../../../assets/icones/ferimentos.png')}
+                    style={styles.categoryIcon}
+                    resizeMode="contain"
+                  />
 
-              <Text style={styles.categoryText}>
-                Ferimentos
-              </Text>
+                  <Text style={styles.categoryText}>
+                    Ferimentos
+                  </Text>
 
-            </Pressable>
+                </Pressable>
 
-            {/* QUEIMADURAS */}
+                {/* QUEIMADURAS */}
 
-            <Pressable
-              style={[
-                styles.categoryCard,
-                styles.queimadurasCard,
-              ]}
-              onPress={() => router.push('/queimaduras')}
-            >
+                <Pressable
+                  style={[
+                    styles.categoryCard,
+                    styles.queimadurasCard,
+                  ]}
+                  onPress={() => router.push('/queimaduras')}
+                >
 
-              <Image
-                source={require('../../../assets/icones/queimaduras.png')}
-                style={styles.categoryIcon}
-                resizeMode="contain"
-              />
+                  <Image
+                    source={require('../../../assets/icones/queimaduras.png')}
+                    style={styles.categoryIcon}
+                    resizeMode="contain"
+                  />
 
-              <Text style={styles.categoryText}>
-                Queimaduras
-              </Text>
+                  <Text style={styles.categoryText}>
+                    Queimaduras
+                  </Text>
 
-            </Pressable>
+                </Pressable>
 
-            {/* MEDICAMENTOS */}
+                {/* MEDICAMENTOS */}
 
-            <Pressable
-              style={[
-                styles.categoryCard,
-                styles.medicamentosCard,
-              ]}
-              onPress={() => router.push('/medicamentos')}
-            >
+                <Pressable
+                  style={[
+                    styles.categoryCard,
+                    styles.medicamentosCard,
+                  ]}
+                  onPress={() => router.push('/medicamentos')}
+                >
 
-              <Image
-                source={require('../../../assets/icones/medicamentos.png')}
-                style={styles.categoryIcon}
-                resizeMode="contain"
-              />
+                  <Image
+                    source={require('../../../assets/icones/medicamentos.png')}
+                    style={styles.categoryIcon}
+                    resizeMode="contain"
+                  />
 
-              <Text style={styles.categoryText}>
-                Medicamentos
-              </Text>
+                  <Text style={styles.categoryText}>
+                    Medicamentos
+                  </Text>
 
-            </Pressable>
+                </Pressable>
 
-            {/* PICADAS */}
+                {/* PICADAS */}
 
-            <Pressable
-              style={[
-                styles.categoryCard,
-                styles.picadasCard,
-              ]}
-              onPress={() => router.push('/picadas')}
-            >
+                <Pressable
+                  style={[
+                    styles.categoryCard,
+                    styles.picadasCard,
+                  ]}
+                  onPress={() => router.push('/picadas')}
+                >
 
-              <Image
-                source={require('../../../assets/icones/picadas.png')}
-                style={styles.categoryIcon}
-                resizeMode="contain"
-              />
+                  <Image
+                    source={require('../../../assets/icones/picadas.png')}
+                    style={styles.categoryIcon}
+                    resizeMode="contain"
+                  />
 
-              <Text style={styles.categoryText}>
-                Picadas
-              </Text>
+                  <Text style={styles.categoryText}>
+                    Picadas
+                  </Text>
 
-            </Pressable>
+                </Pressable>
 
-          </View>
+              </View>
 
-          {/* =========================
-              EMERGÊNCIA
-          ========================= */}
+              {/* =========================
+                  EMERGÊNCIA
+              ========================= */}
 
-          <Pressable
-            style={styles.emergencyButton}
-            onPress={() => router.push('/emergenciaa')}
-          >
+              <Pressable
+                style={styles.emergencyButton}
+                onPress={() => router.push('/emergenciaa')}
+              >
 
-            <Image
-              source={require('../../../assets/icones/emergencia.png')}
-              style={styles.emergencyIcon}
-              resizeMode="contain"
-            />
+                <Image
+                  source={require('../../../assets/icones/emergencia.png')}
+                  style={styles.emergencyIcon}
+                  resizeMode="contain"
+                />
 
-            <View style={styles.emergencyTextContainer}>
+                <View style={styles.emergencyTextContainer}>
 
-              <Text style={styles.emergencyTitle}>
-                Emergência
-              </Text>
+                  <Text style={styles.emergencyTitle}>
+                    Emergência
+                  </Text>
 
-              <Text style={styles.emergencySubtitle}>
-                Precisa de ajuda imediata?
-              </Text>
+                  <Text style={styles.emergencySubtitle}>
+                    Precisa de ajuda imediata?
+                  </Text>
 
-            </View>
+                </View>
 
-            <View style={styles.arrowContainer}>
+                <View style={styles.arrowContainer}>
 
-              <Ionicons
-                name="chevron-forward"
-                size={30}
-                color="#E52335"
-              />
+                  <Ionicons
+                    name="chevron-forward"
+                    size={30}
+                    color="#E52335"
+                  />
 
-            </View>
+                </View>
 
-          </Pressable>
+              </Pressable>
+
+            </>
+          )}
 
         </ScrollView>
 
@@ -344,7 +469,7 @@ const styles = StyleSheet.create({
   },
 
   /* =========================
-     CONTEÚDO QUE ROLA
+     CONTEÚDO
   ========================= */
 
   content: {
@@ -353,22 +478,21 @@ const styles = StyleSheet.create({
 
   /* =========================
      TOPO VERMELHO
-     ROLA JUNTO COM A TELA
   ========================= */
 
   topSection: {
-  height: 155,
-  position: 'relative',
-  backgroundColor: '#F2F7FC',
-},
+    height: 155,
+    position: 'relative',
+    backgroundColor: '#F2F7FC',
+  },
 
   wave: {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  height: 155,
-},
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 155,
+  },
 
   medicalBag: {
     position: 'absolute',
@@ -390,27 +514,22 @@ const styles = StyleSheet.create({
   ========================= */
 
   header: {
-  paddingHorizontal: 24,
-  marginTop: -2,
-  marginBottom: 20,
-},
+    paddingHorizontal: 24,
+    marginTop: -2,
+    marginBottom: 20,
+  },
+
   title: {
     fontSize: 32,
-
     fontWeight: '800',
-
     color: '#172337',
-
     lineHeight: 40,
   },
 
   subtitle: {
     marginTop: 4,
-
     fontSize: 19,
-
     fontWeight: '700',
-
     color: '#53677D',
   },
 
@@ -420,24 +539,21 @@ const styles = StyleSheet.create({
 
   searchContainer: {
     height: 62,
-
     marginHorizontal: 24,
 
     borderWidth: 1.5,
-
     borderColor: '#D9E0E8',
 
     borderRadius: 18,
 
     flexDirection: 'row',
-
     alignItems: 'center',
 
     paddingHorizontal: 16,
 
     backgroundColor: '#FFFFFF',
 
-    marginBottom: 30,
+    marginBottom: 20,
   },
 
   searchInput: {
@@ -451,6 +567,103 @@ const styles = StyleSheet.create({
   },
 
   /* =========================
+     RESULTADOS
+  ========================= */
+
+  resultadosContainer: {
+    marginHorizontal: 24,
+    marginBottom: 20,
+  },
+
+  resultadosTitulo: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#172337',
+    marginBottom: 12,
+  },
+
+  resultadoCard: {
+    minHeight: 75,
+
+    backgroundColor: '#FFFFFF',
+
+    borderRadius: 16,
+
+    marginBottom: 10,
+
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    borderWidth: 1,
+    borderColor: '#E5EAF0',
+  },
+
+  resultadoIcone: {
+    width: 48,
+    height: 48,
+
+    borderRadius: 14,
+
+    backgroundColor: '#FFE9EC',
+
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  resultadoTexto: {
+    flex: 1,
+    marginLeft: 13,
+    marginRight: 8,
+  },
+
+  resultadoTitulo: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#172337',
+  },
+
+  resultadoDescricao: {
+    marginTop: 3,
+    fontSize: 12,
+    lineHeight: 17,
+    color: '#718096',
+  },
+
+  semResultado: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+
+    alignItems: 'center',
+  },
+
+  semResultadoTitulo: {
+    marginTop: 10,
+
+    fontSize: 15,
+    fontWeight: '800',
+
+    color: '#53677D',
+
+    textAlign: 'center',
+  },
+
+  semResultadoDescricao: {
+    marginTop: 5,
+
+    fontSize: 13,
+
+    color: '#8799AA',
+
+    textAlign: 'center',
+  },
+
+  /* =========================
      CATEGORIAS
   ========================= */
 
@@ -458,7 +671,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
 
     flexDirection: 'row',
-
     flexWrap: 'wrap',
 
     justifyContent: 'space-between',
@@ -474,7 +686,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
 
     alignItems: 'center',
-
     justifyContent: 'center',
 
     borderWidth: 1,
@@ -482,31 +693,26 @@ const styles = StyleSheet.create({
 
   ferimentosCard: {
     backgroundColor: '#F9DDDF',
-
     borderColor: '#F4B9BE',
   },
 
   queimadurasCard: {
     backgroundColor: '#FFF0D1',
-
     borderColor: '#F6D18B',
   },
 
   medicamentosCard: {
     backgroundColor: '#CFE8FA',
-
     borderColor: '#A9D3F0',
   },
 
   picadasCard: {
     backgroundColor: '#DDF1E3',
-
     borderColor: '#B8DFC3',
   },
 
   categoryIcon: {
     width: 90,
-
     height: 90,
   },
 
@@ -532,11 +738,9 @@ const styles = StyleSheet.create({
     borderRadius: 18,
 
     marginTop: 30,
-
     marginHorizontal: 24,
 
     flexDirection: 'row',
-
     alignItems: 'center',
 
     paddingHorizontal: 18,
@@ -544,13 +748,11 @@ const styles = StyleSheet.create({
 
   emergencyIcon: {
     width: 68,
-
     height: 68,
   },
 
   emergencyTextContainer: {
     flex: 1,
-
     marginLeft: 8,
   },
 
@@ -574,7 +776,6 @@ const styles = StyleSheet.create({
 
   arrowContainer: {
     width: 48,
-
     height: 48,
 
     borderRadius: 24,
@@ -582,7 +783,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
 
     alignItems: 'center',
-
     justifyContent: 'center',
   },
 
@@ -606,7 +806,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
 
     justifyContent: 'space-around',
-
     alignItems: 'center',
 
     paddingBottom: 3,
@@ -631,17 +830,14 @@ const styles = StyleSheet.create({
     minWidth: 70,
 
     alignItems: 'center',
-
     justifyContent: 'center',
   },
 
   menuIcon: {
     width: 38,
-
     height: 32,
 
     alignItems: 'center',
-
     justifyContent: 'center',
 
     borderRadius: 16,

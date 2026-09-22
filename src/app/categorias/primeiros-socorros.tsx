@@ -205,64 +205,7 @@ export default function PrimeirosSocorros() {
 
         </ScrollView>
 
-        {/* MENU INFERIOR */}
-        <View style={styles.bottomMenu}>
-
-          {/* INÍCIO */}
-          <Pressable
-            style={styles.menuItem}
-            onPress={() => router.push('/tabs')}
-          >
-            <View style={styles.menuIcon}>
-              <Ionicons
-                name="home-outline"
-                size={26}
-                color="#718096"
-              />
-            </View>
-
-            <Text style={styles.menuText}>
-              Início
-            </Text>
-          </Pressable>
-
-          {/* CATEGORIAS */}
-          <Pressable
-            style={styles.menuItem}
-            onPress={() => router.push('/categorias')}
-          >
-            <View style={styles.menuIcon}>
-              <MaterialCommunityIcons
-                name="view-grid-outline"
-                size={26}
-                color="#E52335"
-              />
-            </View>
-
-            <Text style={styles.activeText}>
-              Categorias
-            </Text>
-          </Pressable>
-
-          {/* CONFIGURAÇÃO */}
-          <Pressable
-            style={styles.menuItem}
-            onPress={() => router.push('/configuracao')}
-          >
-            <View style={styles.menuIcon}>
-              <Ionicons
-                name="settings-outline"
-                size={26}
-                color="#718096"
-              />
-            </View>
-
-            <Text style={styles.menuText}>
-              Configuração
-            </Text>
-          </Pressable>
-
-        </View>
+        
 
       </View>
     </SafeAreaView>

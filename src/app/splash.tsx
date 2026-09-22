@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import {
   View,
@@ -47,6 +46,27 @@ export default function Splash() {
         resizeMode="contain"
       />
 
+      {/* NOME DO APP */}
+      <Text style={styles.title}>
+        Socorro Rápido
+      </Text>
+
+      <Text style={styles.subtitle}>
+        Cuidar também é agir rápido
+      </Text>
+
+      {/* PISTA */}
+      <View style={styles.pista}>
+        <View style={styles.faixaCentral}>
+          <View style={styles.traco} />
+          <View style={styles.traco} />
+          <View style={styles.traco} />
+          <View style={styles.traco} />
+          <View style={styles.traco} />
+          <View style={styles.traco} />
+        </View>
+      </View>
+
       {/* AMBULÂNCIA ANIMADA */}
       <Animated.View
         style={[
@@ -64,15 +84,6 @@ export default function Splash() {
         </Text>
       </Animated.View>
 
-      {/* NOME DO APP */}
-      <Text style={styles.title}>
-        Socorro Rápido
-      </Text>
-
-      <Text style={styles.subtitle}>
-        Cuidar também é agir rápido
-      </Text>
-
     </View>
   );
 }
@@ -80,7 +91,7 @@ export default function Splash() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F7FC',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -89,16 +100,6 @@ const styles = StyleSheet.create({
     width: 210,
     height: 210,
     marginBottom: 20,
-  },
-
-  ambulanceContainer: {
-    position: 'absolute',
-    bottom: 150,
-    left: -120,
-  },
-
-  ambulance: {
-    fontSize: 55,
   },
 
   title: {
@@ -111,5 +112,44 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
     color: '#777777',
+  },
+
+  /* PISTA */
+  pista: {
+    position: 'absolute',
+    bottom: 145,
+    left: 0,
+    right: 0,
+    height: 8,
+    backgroundColor: '#D7D7D7',
+  },
+
+  faixaCentral: {
+    position: 'absolute',
+    top: 2,
+    left: 0,
+    right: 0,
+    height: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+
+  traco: {
+    width: 32,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: '#FFFFFF',
+  },
+
+  /* AMBULÂNCIA */
+  ambulanceContainer: {
+    position: 'absolute',
+    bottom: 148,
+    left: -120,
+  },
+
+  ambulance: {
+    fontSize: 55,
   },
 });
