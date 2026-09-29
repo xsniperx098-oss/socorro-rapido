@@ -1,204 +1,343 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
   View,
   Text,
   StyleSheet,
+  SafeAreaView,
   Pressable,
+  ScrollView,
   Linking,
+  Alert,
+  Share,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 
 export default function Emergencia() {
   const router = useRouter();
 
-  const ligar = (numero: string) => {
-    Linking.openURL(`tel:${numero}`);
+  const [localizacao, setLocalizacao] = useState<Location.LocationObject | null>(null);
+  const [carregandoLocalizacao, setCarregandoLocalizacao] = useState(false);
+
+  const ligar = (numero: string, nome: string) => {
+    Alert.alert(
+      `Ligar para ${nome}`,
+      `Deseja ligar para ${nome} (${numero})?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Ligar',
+          onPress: () => {
+            Linking.openURL(`tel:${numero}`);
+          },
+        },
+      ]
+    );
+  };
+
+  const abrirAjuda = () => {
+    Alert.alert(
+      'Preciso de ajuda',
+      'Escolha o serviço de emergência:',
+      [
+        {
+          text: 'SAMU — 192',
+          onPress: () => ligar('192', 'SAMU'),
+        },
+        {
+          text: 'Bombeiros — 193',
+          onPress: () => ligar('193', 'Bombeiros'),
+        },
+        {
+          text: 'Polícia — 190',
+          onPress: () => ligar('190', 'Polícia'),
+        },
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
+  const obterLocalizacao = async () => {
+    try {
+      setCarregandoLocalizacao(true);
+
+      const { status } =
+        await Location.requestForegroundPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permissão necessária',
+          'Permita o acesso à localização para usar esta função.'
+        );
+        return;
+      }
+
+      const local = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+
+      setLocalizacao(local);
+    } catch (error) {
+      Alert.alert(
+        'Erro',
+        'Não foi possível obter sua localização.'
+      );
+    } finally {
+      setCarregandoLocalizacao(false);
+    }
+  };
+
+  const compartilharLocalizacao = async () => {
+    if (!localizacao) {
+      Alert.alert(
+        'Localização não encontrada',
+        'Obtenha sua localização primeiro.'
+      );
+      return;
+    }
+
+    const latitude = localizacao.coords.latitude;
+    const longitude = localizacao.coords.longitude;
+
+    const mapa =
+      `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+    const mensagem =
+      `Preciso de ajuda.\n\nMinha localização:\n${mapa}`;
+
+    try {
+      await Share.share({
+        message: mensagem,
+      });
+    } catch (error) {
+      Alert.alert(
+        'Erro',
+        'Não foi possível abrir o compartilhamento.'
+      );
+    }
+  };
+
+  const abrirMapa = () => {
+    if (!localizacao) return;
+
+    const latitude = localizacao.coords.latitude;
+    const longitude = localizacao.coords.longitude;
+
+    const mapa =
+      `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+    Linking.openURL(mapa);
+  };
+
+  const mostrarInformacoes = () => {
+    Alert.alert(
+      'Informações para o socorro',
+      'Durante uma chamada de emergência, informe:\n\n' +
+        '• Onde você está\n' +
+        '• O que aconteceu\n' +
+        '• Quantas pessoas precisam de ajuda\n' +
+        '• Se a pessoa está consciente\n' +
+        '• Se a pessoa está respirando',
+      [
+        {
+          text: 'Entendi',
+        },
+      ]
+    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
+        contentContainerStyle={styles.conteudo}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
       >
-        {/* CABEÇALHO */}
-        <View style={styles.header}>
-          <Pressable style={styles.voltar} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={27} color="#172337" />
+        <View style={styles.topo}>
+          <Pressable
+            style={styles.botaoVoltar}
+            onPress={() => router.back()}
+          >
+            <Ionicons
+              name="arrow-back"
+              size={25}
+              color="#111"
+            />
           </Pressable>
 
-          <View style={styles.headerTexto}>
+          <View>
             <Text style={styles.titulo}>Emergência</Text>
             <Text style={styles.subtitulo}>
-              Números importantes para situações de emergência
+              Ações rápidas quando você precisar
             </Text>
           </View>
         </View>
 
-        {/* DESTAQUE */}
-        <View style={styles.destaque}>
-          <View style={styles.iconeDestaque}>
-            <MaterialCommunityIcons
-              name="phone-alert-outline"
-              size={38}
-              color="#D71920"
+        <Pressable
+          style={styles.cardAjuda}
+          onPress={abrirAjuda}
+        >
+          <View style={styles.iconeAjuda}>
+            <Ionicons
+              name="alert-circle"
+              size={32}
+              color="#fff"
             />
           </View>
 
-          <View style={styles.destaqueTexto}>
-            <Text style={styles.destaqueTitulo}>Precisa de ajuda?</Text>
-            <Text style={styles.destaqueDescricao}>
-              Em uma situação de emergência, procure ajuda profissional.
+          <View style={styles.textosAjuda}>
+            <Text style={styles.tituloAjuda}>
+              Preciso de ajuda
+            </Text>
+
+            <Text style={styles.subtituloAjuda}>
+              Ligue rapidamente para um serviço de emergência
             </Text>
           </View>
-        </View>
 
-        {/* NÚMEROS */}
-        <Text style={styles.secaoTitulo}>Números de emergência</Text>
+          <Ionicons
+            name="chevron-forward"
+            size={24}
+            color="#fff"
+          />
+        </Pressable>
+
+        <Text style={styles.tituloSecao}>
+          Ações rápidas
+        </Text>
 
         <View style={styles.card}>
-
-          {/* SAMU */}
-          <Pressable
-            style={styles.item}
-            onPress={() => ligar('192')}
-          >
-            <View style={styles.iconeItem}>
-              <MaterialCommunityIcons
-                name="ambulance"
-                size={27}
-                color="#D71920"
+          <View style={styles.linhaTitulo}>
+            <View style={styles.icone}>
+              <Ionicons
+                name="location"
+                size={24}
+                color="#e53935"
               />
             </View>
 
-            <View style={styles.itemTexto}>
-              <Text style={styles.itemTitulo}>SAMU</Text>
-              <Text style={styles.itemDescricao}>
-                Atendimento médico de emergência
+            <View style={styles.textos}>
+              <Text style={styles.tituloCard}>
+                Minha localização
+              </Text>
+
+              <Text style={styles.descricao}>
+                Encontre sua localização atual para informar ou enviar.
               </Text>
             </View>
+          </View>
 
-            <View style={styles.numero}>
-              <Text style={styles.numeroTexto}>192</Text>
-              <Ionicons
-                name="call-outline"
-                size={18}
-                color="#D71920"
-              />
-            </View>
-          </Pressable>
-
-          <View style={styles.linha} />
-
-          {/* BOMBEIROS */}
           <Pressable
-            style={styles.item}
-            onPress={() => ligar('193')}
+            style={styles.botao}
+            onPress={obterLocalizacao}
+            disabled={carregandoLocalizacao}
           >
-            <View style={styles.iconeItem}>
-              <MaterialCommunityIcons
-                name="fire-truck"
-                size={27}
-                color="#D71920"
-              />
-            </View>
+            <Ionicons
+              name="locate"
+              size={20}
+              color="#fff"
+            />
 
-            <View style={styles.itemTexto}>
-              <Text style={styles.itemTitulo}>Bombeiros</Text>
-              <Text style={styles.itemDescricao}>
-                Incêndios, resgates e emergências
-              </Text>
-            </View>
-
-            <View style={styles.numero}>
-              <Text style={styles.numeroTexto}>193</Text>
-              <Ionicons
-                name="call-outline"
-                size={18}
-                color="#D71920"
-              />
-            </View>
+            <Text style={styles.textoBotao}>
+              {carregandoLocalizacao
+                ? 'Obtendo localização...'
+                : 'Obter minha localização'}
+            </Text>
           </Pressable>
 
-          <View style={styles.linha} />
-
-          {/* POLÍCIA */}
-          <Pressable
-            style={styles.item}
-            onPress={() => ligar('190')}
-          >
-            <View style={styles.iconeItem}>
-              <Ionicons
-                name="shield-outline"
-                size={27}
-                color="#D71920"
-              />
-            </View>
-
-            <View style={styles.itemTexto}>
-              <Text style={styles.itemTitulo}>Polícia Militar</Text>
-              <Text style={styles.itemDescricao}>
-                Situações de emergência e segurança
+          {localizacao && (
+            <View style={styles.localizacaoBox}>
+              <Text style={styles.localizacaoTitulo}>
+                Localização encontrada
               </Text>
-            </View>
 
-            <View style={styles.numero}>
-              <Text style={styles.numeroTexto}>190</Text>
-              <Ionicons
-                name="call-outline"
-                size={18}
-                color="#D71920"
-              />
-            </View>
-          </Pressable>
-
-          <View style={styles.linha} />
-
-          {/* DEFESA CIVIL */}
-          <Pressable
-            style={styles.item}
-            onPress={() => ligar('199')}
-          >
-            <View style={styles.iconeItem}>
-              <MaterialCommunityIcons
-                name="shield-alert-outline"
-                size={27}
-                color="#D71920"
-              />
-            </View>
-
-            <View style={styles.itemTexto}>
-              <Text style={styles.itemTitulo}>Defesa Civil</Text>
-              <Text style={styles.itemDescricao}>
-                Situações de risco e desastres
+              <Text style={styles.coordenadas}>
+                Latitude: {localizacao.coords.latitude.toFixed(6)}
               </Text>
-            </View>
 
-            <View style={styles.numero}>
-              <Text style={styles.numeroTexto}>199</Text>
-              <Ionicons
-                name="call-outline"
-                size={18}
-                color="#D71920"
-              />
-            </View>
-          </Pressable>
+              <Text style={styles.coordenadas}>
+                Longitude: {localizacao.coords.longitude.toFixed(6)}
+              </Text>
 
+              <Pressable
+                style={styles.botaoMapa}
+                onPress={abrirMapa}
+              >
+                <Ionicons
+                  name="map-outline"
+                  size={20}
+                  color="#e53935"
+                />
+
+                <Text style={styles.textoBotaoMapa}>
+                  Ver no mapa
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.botaoEnviar}
+                onPress={compartilharLocalizacao}
+              >
+                <Ionicons
+                  name="share-outline"
+                  size={20}
+                  color="#fff"
+                />
+
+                <Text style={styles.textoBotaoEnviar}>
+                  Enviar localização
+                </Text>
+              </Pressable>
+            </View>
+          )}
         </View>
 
-        {/* AVISO */}
+        <Pressable
+          style={styles.card}
+          onPress={mostrarInformacoes}
+        >
+          <View style={styles.linhaTitulo}>
+            <View style={styles.icone}>
+              <Ionicons
+                name="information-circle"
+                size={25}
+                color="#e53935"
+              />
+            </View>
+
+            <View style={styles.textos}>
+              <Text style={styles.tituloCard}>
+                Informações para o socorro
+              </Text>
+
+              <Text style={styles.descricao}>
+                Veja o que é importante informar durante uma emergência.
+              </Text>
+            </View>
+
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color="#999"
+            />
+          </View>
+        </Pressable>
+
         <View style={styles.aviso}>
-          <MaterialCommunityIcons
-            name="information-outline"
-            size={24}
-            color="#D71920"
+          <Ionicons
+            name="warning-outline"
+            size={22}
+            color="#d98200"
           />
 
-          <Text style={styles.avisoTexto}>
-            Toque em um número para iniciar uma ligação.
+          <Text style={styles.textoAviso}>
+            Em uma emergência grave, procure ajuda imediatamente.
           </Text>
         </View>
       </ScrollView>
@@ -209,165 +348,213 @@ export default function Emergencia() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F7FC',
+    backgroundColor: '#f7f8fa',
   },
 
-  content: {
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 30,
+  conteudo: {
+    padding: 20,
+    paddingBottom: 35,
   },
 
-  header: {
+  topo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 25,
   },
 
-  voltar: {
-    width: 44,
-    height: 44,
-    borderRadius: 15,
-    backgroundColor: '#FFF',
+  botaoVoltar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
 
-  headerTexto: {
-    flex: 1,
-  },
-
   titulo: {
-    fontSize: 26,
+    fontSize: 27,
     fontWeight: '800',
-    color: '#172337',
+    color: '#111',
   },
 
   subtitulo: {
-    marginTop: 4,
-    fontSize: 13,
-    lineHeight: 18,
-    color: '#718096',
+    fontSize: 14,
+    color: '#777',
+    marginTop: 3,
   },
 
-  destaque: {
-    backgroundColor: '#FFF',
+  cardAjuda: {
+    backgroundColor: '#e53935',
     borderRadius: 20,
     padding: 18,
     flexDirection: 'row',
     alignItems: 'center',
-    elevation: 3,
+    marginBottom: 28,
   },
 
-  iconeDestaque: {
-    width: 70,
-    height: 70,
-    borderRadius: 20,
-    backgroundColor: '#FFE7E7',
+  iconeAjuda: {
+    width: 55,
+    height: 55,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  destaqueTexto: {
+  textosAjuda: {
     flex: 1,
-    marginLeft: 15,
+    marginLeft: 14,
+    marginRight: 8,
   },
 
-  destaqueTitulo: {
-    fontSize: 17,
+  tituloAjuda: {
+    color: '#fff',
+    fontSize: 18,
     fontWeight: '800',
-    color: '#172337',
   },
 
-  destaqueDescricao: {
-    marginTop: 6,
+  subtituloAjuda: {
+    color: '#fff',
+    opacity: 0.9,
     fontSize: 13,
-    lineHeight: 19,
-    color: '#718096',
+    marginTop: 4,
+    lineHeight: 18,
   },
 
-  secaoTitulo: {
-    marginTop: 27,
-    marginBottom: 12,
-    fontSize: 21,
+  tituloSecao: {
+    fontSize: 20,
     fontWeight: '800',
-    color: '#172337',
+    color: '#111',
+    marginBottom: 12,
   },
 
   card: {
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    paddingHorizontal: 18,
-    paddingVertical: 6,
-    elevation: 2,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 14,
   },
 
-  item: {
+  linhaTitulo: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 17,
   },
 
-  iconeItem: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: '#FFE7E7',
+  icone: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: '#fff1f1',
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  itemTexto: {
+  textos: {
     flex: 1,
-    marginLeft: 14,
+    marginLeft: 12,
   },
 
-  itemTitulo: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#172337',
-  },
-
-  itemDescricao: {
-    marginTop: 4,
-    fontSize: 12,
-    lineHeight: 17,
-    color: '#718096',
-  },
-
-  numero: {
-    marginLeft: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  numeroTexto: {
+  tituloCard: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#D71920',
+    color: '#111',
+  },
+
+  descricao: {
+    fontSize: 13,
+    color: '#777',
+    marginTop: 4,
+    lineHeight: 18,
+  },
+
+  botao: {
+    backgroundColor: '#e53935',
+    borderRadius: 12,
+    height: 48,
+    marginTop: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+
+  textoBotao: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  localizacaoBox: {
+    backgroundColor: '#f7f8fa',
+    borderRadius: 14,
+    padding: 14,
+    marginTop: 14,
+  },
+
+  localizacaoTitulo: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#111',
+    marginBottom: 8,
+  },
+
+  coordenadas: {
+    fontSize: 13,
+    color: '#666',
     marginBottom: 3,
   },
 
-  linha: {
-    height: 1,
-    backgroundColor: '#EDF1F5',
+  botaoMapa: {
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e53935',
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+
+  textoBotaoMapa: {
+    color: '#e53935',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+
+  botaoEnviar: {
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: '#e53935',
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+
+  textoBotaoEnviar: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
   },
 
   aviso: {
-    marginTop: 18,
-    backgroundColor: '#FFF4F4',
-    borderRadius: 18,
-    padding: 16,
+    backgroundColor: '#fff8e8',
+    borderRadius: 14,
+    padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 8,
   },
 
-  avisoTexto: {
+  textoAviso: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 10,
+    color: '#795500',
     fontSize: 13,
     lineHeight: 18,
-    color: '#6B7280',
   },
 });

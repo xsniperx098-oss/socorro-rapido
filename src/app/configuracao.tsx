@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -19,7 +18,6 @@ export default function Configuracao() {
   const [email, setEmail] = useState('');
   const [nome, setNome] = useState('');
 
-  // CARREGAR DADOS DO USUÁRIO
   useEffect(() => {
     const carregarUsuario = async () => {
       const {
@@ -41,7 +39,6 @@ export default function Configuracao() {
     carregarUsuario();
   }, []);
 
-  // SAIR DA CONTA
   const sairDaConta = async () => {
     Alert.alert(
       'Sair da conta',
@@ -55,8 +52,7 @@ export default function Configuracao() {
           text: 'Sair',
           style: 'destructive',
           onPress: async () => {
-            const { error } =
-              await supabase.auth.signOut();
+            const { error } = await supabase.auth.signOut();
 
             if (error) {
               Alert.alert(
@@ -77,327 +73,346 @@ export default function Configuracao() {
     <SafeAreaView style={styles.container}>
       <View style={styles.screen}>
 
-        {/* CONTEÚDO */}
-        <View style={styles.contentArea}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.content}
-          >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.content}
+        >
 
-            {/* TÍTULO */}
+          {/* TOPO */}
+          <View style={styles.header}>
+            <Pressable
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons
+                name="chevron-back"
+                size={32}
+                color="#111111"
+              />
+            </Pressable>
+
             <Text style={styles.title}>
               Configurações
             </Text>
+          </View>
 
-            {/* CARTÃO DO PERFIL */}
-            <View style={styles.profileCard}>
+          {/* PERFIL */}
+          <View style={styles.profileArea}>
 
-              <View style={styles.profileTop}>
-
-                <View style={styles.avatar}>
-                  <Ionicons
-                    name="person"
-                    size={38}
-                    color="#12355B"
-                  />
-                </View>
-
-                <View style={styles.profileInfo}>
-
-                  <Text style={styles.profileName}>
-                    {nome || 'Usuário'}
-                  </Text>
-
-                  <Text style={styles.profileEmail}>
-                    {email || 'E-mail não disponível'}
-                  </Text>
-
-                  <View style={styles.secureBadge}>
-                    <Ionicons
-                      name="shield-checkmark"
-                      size={14}
-                      color="#178B35"
-                    />
-
-                    <Text style={styles.secureText}>
-                      Conta segura
-                    </Text>
-                  </View>
-
-                </View>
-
-              </View>
-
-              {/* ATALHOS */}
-              <View style={styles.shortcuts}>
-
-                {/* EDITAR PERFIL */}
-                <Pressable
-                  style={styles.shortcut}
-                  onPress={() =>
-                    Alert.alert(
-                      'Editar perfil',
-                      'Tela em desenvolvimento.'
-                    )
-                  }
-                >
-                  <Ionicons
-                    name="person-outline"
-                    size={28}
-                    color="#111111"
-                  />
-
-                  <Text style={styles.shortcutText}>
-                    Editar perfil
-                  </Text>
-                </Pressable>
-
-                <View style={styles.shortcutDivider} />
-
-                {/* NOTIFICAÇÕES */}
-                <Pressable
-                  style={styles.shortcut}
-                  onPress={() =>
-                    Alert.alert(
-                      'Notificações',
-                      'Tela em desenvolvimento.'
-                    )
-                  }
-                >
-                  <Ionicons
-                    name="notifications-outline"
-                    size={28}
-                    color="#111111"
-                  />
-
-                  <Text style={styles.shortcutText}>
-                    Notificação
-                  </Text>
-                </Pressable>
-
-                <View style={styles.shortcutDivider} />
-
-                {/* SEGURANÇA */}
-                <Pressable
-                  style={styles.shortcut}
-                  onPress={() =>
-                    Alert.alert(
-                      'Segurança',
-                      'Tela em desenvolvimento.'
-                    )
-                  }
-                >
-                  <Ionicons
-                    name="shield-checkmark-outline"
-                    size={28}
-                    color="#111111"
-                  />
-
-                  <Text style={styles.shortcutText}>
-                    Segurança
-                  </Text>
-                </Pressable>
-
-              </View>
-
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {nome
+                  ? nome
+                      .split(' ')
+                      .slice(0, 2)
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()
+                  : 'U'}
+              </Text>
             </View>
 
-            {/* PREFERÊNCIAS E INFORMAÇÕES */}
-            <Text style={styles.sectionTitle}>
-              Preferências e informações
+            <Text style={styles.profileName}>
+              {nome || 'Usuário'}
             </Text>
 
-            <View style={styles.optionsCard}>
+            <Text style={styles.profileEmail}>
+              {email || 'E-mail não disponível'}
+            </Text>
 
-              {/* PREFERÊNCIAS DE SAÚDE */}
-              <Pressable
-                style={styles.option}
-                onPress={() =>
-                  Alert.alert(
-                    'Preferências de saúde',
-                    'Tela em desenvolvimento.'
-                  )
-                }
-              >
-                <Ionicons
-                  name="medkit-outline"
-                  size={27}
-                  color="#111111"
-                />
+          </View>
 
-                <View style={styles.optionText}>
-                  <Text style={styles.optionTitle}>
-                    Preferências de saúde
-                  </Text>
+          {/* ATALHOS */}
+          <View style={styles.shortcuts}>
 
-                  <Text style={styles.optionSubtitle}>
-                    Alergias, condições e medicamentos
-                  </Text>
-                </View>
-
-                <Ionicons
-                  name="chevron-down"
-                  size={24}
-                  color="#111111"
-                />
-              </Pressable>
-
-              <View style={styles.optionDivider} />
-
-              {/* HISTÓRICO */}
-              <Pressable
-                style={styles.option}
-                onPress={() =>
-                  Alert.alert(
-                    'Histórico de acessos',
-                    'Tela em desenvolvimento.'
-                  )
-                }
-              >
-                <Ionicons
-                  name="list-outline"
-                  size={27}
-                  color="#111111"
-                />
-
-                <View style={styles.optionText}>
-                  <Text style={styles.optionTitle}>
-                    Histórico de acessos
-                  </Text>
-
-                  <Text style={styles.optionSubtitle}>
-                    Veja os conteúdos que você acessou
-                  </Text>
-                </View>
-
-                <Ionicons
-                  name="chevron-down"
-                  size={24}
-                  color="#111111"
-                />
-              </Pressable>
-
-              <View style={styles.optionDivider} />
-
-              {/* CENTRAL DE AJUDA */}
-              <Pressable
-                style={styles.option}
-                onPress={() =>
-                  Alert.alert(
-                    'Central de ajuda',
-                    'Tela em desenvolvimento.'
-                  )
-                }
-              >
-                <Ionicons
-                  name="help-circle-outline"
-                  size={27}
-                  color="#111111"
-                />
-
-                <View style={styles.optionText}>
-                  <Text style={styles.optionTitle}>
-                    Central de ajuda
-                  </Text>
-
-                  <Text style={styles.optionSubtitle}>
-                    Dúvidas frequentes e suporte
-                  </Text>
-                </View>
-
-                <Ionicons
-                  name="chevron-down"
-                  size={24}
-                  color="#111111"
-                />
-              </Pressable>
-
-              <View style={styles.optionDivider} />
-
-              {/* SOBRE O APP */}
-              <Pressable
-                style={styles.option}
-                onPress={() =>
-                  Alert.alert(
-                    'Sobre o app',
-                    'Socorro Rápido\nVersão 1.0.0'
-                  )
-                }
-              >
-                <Ionicons
-                  name="information-circle-outline"
-                  size={27}
-                  color="#111111"
-                />
-
-                <View style={styles.optionText}>
-                  <Text style={styles.optionTitle}>
-                    Sobre o app
-                  </Text>
-
-                  <Text style={styles.optionSubtitle}>
-                    Versão 1.0.0
-                  </Text>
-                </View>
-
-                <Ionicons
-                  name="chevron-down"
-                  size={24}
-                  color="#111111"
-                />
-              </Pressable>
-
-              <View style={styles.optionDivider} />
-
-              {/* COMPARTILHAR */}
-              <Pressable
-                style={styles.option}
-                onPress={() =>
-                  Alert.alert(
-                    'Compartilhar o app',
-                    'Em breve você poderá compartilhar o Socorro Rápido.'
-                  )
-                }
-              >
-                <Ionicons
-                  name="share-outline"
-                  size={27}
-                  color="#111111"
-                />
-
-                <View style={styles.optionText}>
-                  <Text style={styles.optionTitle}>
-                    Compartilhar o app
-                  </Text>
-
-                  <Text style={styles.optionSubtitle}>
-                    Indique para amigos e familiares
-                  </Text>
-                </View>
-
-                <Ionicons
-                  name="chevron-down"
-                  size={24}
-                  color="#111111"
-                />
-              </Pressable>
-
-            </View>
-
-            {/* SAIR DA CONTA */}
             <Pressable
-              style={styles.logoutButton}
-              onPress={sairDaConta}
+              style={styles.shortcut}
+              onPress={() =>
+                Alert.alert(
+                  'Editar perfil',
+                  'Tela em desenvolvimento.'
+                )
+              }
             >
-              <Text style={styles.logoutText}>
-                SAIR DA CONTA
+              <View style={styles.shortcutCircle}>
+                <Ionicons
+                  name="pencil-outline"
+                  size={27}
+                  color="#D71920"
+                />
+              </View>
+
+              <Text style={styles.shortcutText}>
+                Editar perfil
               </Text>
             </Pressable>
 
-          </ScrollView>
-        </View>
+            <Pressable
+              style={styles.shortcut}
+              onPress={() =>
+                Alert.alert(
+                  'Notificações',
+                  'Tela em desenvolvimento.'
+                )
+              }
+            >
+              <View style={styles.shortcutCircle}>
+                <Ionicons
+                  name="notifications-outline"
+                  size={27}
+                  color="#D71920"
+                />
+              </View>
 
-        {/* MENU INFERIOR */}
+              <Text style={styles.shortcutText}>
+                Notificações
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.shortcut}
+              onPress={() =>
+                Alert.alert(
+                  'Privacidade e segurança',
+                  'Tela em desenvolvimento.'
+                )
+              }
+            >
+              <View style={styles.shortcutCircle}>
+                <Ionicons
+                  name="shield-checkmark-outline"
+                  size={27}
+                  color="#D71920"
+                />
+              </View>
+
+              <Text style={styles.shortcutText}>
+                Privacidade e segurança
+              </Text>
+            </Pressable>
+
+          </View>
+
+          {/* CONTA */}
+          <Text style={styles.sectionTitle}>
+            CONTA
+          </Text>
+
+          <View style={styles.card}>
+
+            <Pressable
+              style={styles.option}
+              onPress={() =>
+                Alert.alert(
+                  'Dados pessoais',
+                  'Tela em desenvolvimento.'
+                )
+              }
+            >
+              <View style={styles.optionIcon}>
+                <Ionicons
+                  name="person-outline"
+                  size={25}
+                  color="#D71920"
+                />
+              </View>
+
+              <Text style={styles.optionTitle}>
+                Dados pessoais
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={23}
+                color="#777777"
+              />
+            </Pressable>
+
+          </View>
+
+          {/* APLICATIVO */}
+          <Text style={styles.sectionTitle}>
+            APLICATIVO
+          </Text>
+
+          <View style={styles.card}>
+
+            <Pressable
+              style={styles.option}
+              onPress={() =>
+                Alert.alert(
+                  'Notificações',
+                  'Tela em desenvolvimento.'
+                )
+              }
+            >
+              <View style={styles.optionIcon}>
+                <Ionicons
+                  name="notifications-outline"
+                  size={25}
+                  color="#D71920"
+                />
+              </View>
+
+              <Text style={styles.optionTitle}>
+                Notificações
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={23}
+                color="#777777"
+              />
+            </Pressable>
+
+            <View style={styles.divider} />
+
+            <Pressable
+              style={styles.option}
+              onPress={() =>
+                Alert.alert(
+                  'Preferências',
+                  'Tela em desenvolvimento.'
+                )
+              }
+            >
+              <View style={styles.optionIcon}>
+                <Ionicons
+                  name="settings-outline"
+                  size={25}
+                  color="#D71920"
+                />
+              </View>
+
+              <Text style={styles.optionTitle}>
+                Preferências
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={23}
+                color="#777777"
+              />
+            </Pressable>
+
+          </View>
+
+          {/* SUPORTE */}
+          <Text style={styles.sectionTitle}>
+            SUPORTE
+          </Text>
+
+          <View style={styles.card}>
+
+            <Pressable
+              style={styles.option}
+              onPress={() =>
+                Alert.alert(
+                  'Central de ajuda',
+                  'Tela em desenvolvimento.'
+                )
+              }
+            >
+              <View style={styles.optionIcon}>
+                <Ionicons
+                  name="help-circle-outline"
+                  size={25}
+                  color="#D71920"
+                />
+              </View>
+
+              <Text style={styles.optionTitle}>
+                Central de ajuda
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={23}
+                color="#777777"
+              />
+            </Pressable>
+
+            <View style={styles.divider} />
+
+            <Pressable
+              style={styles.option}
+              onPress={() =>
+                Alert.alert(
+                  'Sobre o app',
+                  'Socorro Rápido\nVersão 1.0.0'
+                )
+              }
+            >
+              <View style={styles.optionIcon}>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={25}
+                  color="#D71920"
+                />
+              </View>
+
+              <Text style={styles.optionTitle}>
+                Sobre o app
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={23}
+                color="#777777"
+              />
+            </Pressable>
+
+            <View style={styles.divider} />
+
+            <Pressable
+              style={styles.option}
+              onPress={() =>
+                Alert.alert(
+                  'Compartilhar o app',
+                  'Em breve você poderá compartilhar o Socorro Rápido.'
+                )
+              }
+            >
+              <View style={styles.optionIcon}>
+                <Ionicons
+                  name="share-social-outline"
+                  size={25}
+                  color="#D71920"
+                />
+              </View>
+
+              <Text style={styles.optionTitle}>
+                Compartilhar o app
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={23}
+                color="#777777"
+              />
+            </Pressable>
+
+          </View>
+
+          {/* SAIR */}
+          <Pressable
+            style={styles.logoutButton}
+            onPress={sairDaConta}
+          >
+            <Ionicons
+              name="log-out-outline"
+              size={24}
+              color="#D71920"
+            />
+
+            <Text style={styles.logoutText}>
+              Sair da conta
+            </Text>
+          </Pressable>
+
+        </ScrollView>
+
+        {/* BARRA INFERIOR — MANTIDA */}
         <View style={styles.bottomMenu}>
 
           {/* INÍCIO */}
@@ -464,177 +479,178 @@ export default function Configuracao() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F7FC',
+    backgroundColor: '#FFFFFF',
   },
 
   screen: {
     flex: 1,
-    backgroundColor: '#F2F7FC',
-  },
-
-  contentArea: {
-    flex: 1,
+    backgroundColor: '#FFFFFF',
   },
 
   content: {
-    paddingHorizontal: 12,
-    paddingTop: 28,
+    paddingHorizontal: 22,
+    paddingTop: 15,
     paddingBottom: 25,
   },
 
-  title: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: '#111111',
-    marginBottom: 18,
-  },
+ header: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 18,
+  paddingTop: 12,
+},
 
-  profileCard: {
-    backgroundColor: '#C7D3E1',
-    borderWidth: 1,
-    borderColor: '#8499B1',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
+backButton: {
+  width: 38,
+  height: 38,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: 5,
+},
 
-  profileTop: {
-    flexDirection: 'row',
+title: {
+  fontSize: 28,
+  fontWeight: '800',
+  color: '#111111',
+  marginTop: 3,
+},
+
+  profileArea: {
     alignItems: 'center',
-    padding: 15,
-  },
-
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#AABBCD',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  profileInfo: {
-    flex: 1,
-    marginLeft: 13,
-  },
-
-  profileName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#111111',
-  },
-
-  profileEmail: {
-    fontSize: 12,
-    color: '#111111',
-    marginTop: 3,
-  },
-
-  secureBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: '#D7F5D9',
-    borderRadius: 5,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
     marginTop: 5,
   },
 
-  secureText: {
-    fontSize: 10,
-    color: '#178B35',
-    fontWeight: '700',
-    marginLeft: 3,
+  avatar: {
+    width: 105,
+    height: 105,
+    borderRadius: 53,
+    backgroundColor: '#FFD6D9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  avatarText: {
+    fontSize: 39,
+    fontWeight: '800',
+    color: '#D71920',
+  },
+
+  profileName: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#111111',
+    marginTop: 12,
+  },
+
+  profileEmail: {
+    fontSize: 17,
+    color: '#666666',
+    marginTop: 3,
   },
 
   shortcuts: {
-    height: 68,
-    backgroundColor: '#FFFFFF',
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 25,
+    marginBottom: 8,
   },
 
   shortcut: {
-    flex: 1,
+    width: '31%',
+    alignItems: 'center',
+  },
+
+  shortcutCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: '#FFE1E3',
+    borderWidth: 1.5,
+    borderColor: '#E52335',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
   },
 
   shortcutText: {
-    fontSize: 11,
+    textAlign: 'center',
+    fontSize: 14,
     color: '#111111',
     fontWeight: '600',
-  },
-
-  shortcutDivider: {
-    width: 1,
-    height: '100%',
-    backgroundColor: '#BDBDBD',
+    marginTop: 8,
+    lineHeight: 18,
   },
 
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#111111',
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#666666',
     marginTop: 20,
-    marginBottom: 10,
+    marginBottom: 9,
+    letterSpacing: 0.3,
   },
 
-  optionsCard: {
+  card: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#BDBDBD',
-    borderRadius: 10,
+    borderRadius: 18,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 4,
     overflow: 'hidden',
   },
 
   option: {
-    minHeight: 68,
+    minHeight: 66,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
 
-  optionText: {
-    flex: 1,
-    marginLeft: 12,
-    marginRight: 5,
+  optionIcon: {
+    width: 43,
+    height: 43,
+    borderRadius: 22,
+    backgroundColor: '#FFE3E5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 13,
   },
 
   optionTitle: {
-    fontSize: 13,
-    fontWeight: '800',
+    flex: 1,
+    fontSize: 17,
     color: '#111111',
+    fontWeight: '500',
   },
 
-  optionSubtitle: {
-    fontSize: 11,
-    color: '#333333',
-    marginTop: 3,
-  },
-
-  optionDivider: {
+  divider: {
     height: 1,
-    backgroundColor: '#BDBDBD',
+    backgroundColor: '#EEEEEE',
+    marginLeft: 70,
   },
 
   logoutButton: {
-    height: 52,
-    backgroundColor: '#F49A9F',
+    height: 55,
+    borderRadius: 28,
+    backgroundColor: '#FFE0E2',
     borderWidth: 1,
     borderColor: '#E52335',
-    borderRadius: 26,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 45,
+    marginTop: 24,
+    marginBottom: 10,
   },
 
   logoutText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: '#A80000',
+    color: '#D71920',
+    fontSize: 16,
+    fontWeight: '700',
+    marginLeft: 8,
   },
 
   bottomMenu: {

@@ -205,10 +205,10 @@ export default function Categorias() {
             />
           </Pressable>
 
-          {/* EMERGÊNCIA */}
+          {/* NUMEROS EMERGÊNCIA */}
           <Pressable
             style={styles.card}
-            onPress={() => router.push('/categorias/emergencia')}
+            onPress={() => router.push('/categorias/numeros-emergencia')}
           >
             <View
               style={[
