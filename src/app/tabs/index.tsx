@@ -1,3 +1,5 @@
+// index.tsx
+
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
@@ -9,6 +11,7 @@ import {
   ScrollView,
   SafeAreaView,
   Image,
+  
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Svg, { Path } from 'react-native-svg';
@@ -16,14 +19,18 @@ import Svg, { Path } from 'react-native-svg';
 export default function Index() {
   const router = useRouter();
 
-  // =========================
-  // BUSCA
-  // =========================
-
   const [textoBusca, setTextoBusca] = useState('');
 
+  // =========================
+  // BUSCA INTELIGENTE
+  // =========================
+
   const resultados = useMemo(() => {
-    const texto = textoBusca.trim().toLowerCase();
+    const texto = textoBusca
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
 
     if (!texto) {
       return [];
@@ -35,34 +42,133 @@ export default function Index() {
         descricao: 'Cuidados para cortes, machucados e ferimentos.',
         rota: '/ferimentos',
         icone: 'medical-bag' as const,
+        palavras: [
+          'ferimento',
+          'ferimentos',
+          'corte',
+          'cortes',
+          'cortar',
+          'cortei',
+          'machucado',
+          'machucados',
+          'ferida',
+          'feridas',
+          'sangue',
+          'sangramento',
+          'sangrar',
+          'sangrando',
+          'arranhao',
+          'arranhado',
+          'arranhão',
+          'lesao',
+          'lesão',
+          'bateu',
+          'batida',
+        ],
       },
+
       {
         titulo: 'Queimaduras',
         descricao: 'Orientações para situações envolvendo queimaduras.',
         rota: '/queimaduras',
         icone: 'fire' as const,
+        palavras: [
+          'queimadura',
+          'queimaduras',
+          'queimei',
+          'queimou',
+          'queimar',
+          'fogo',
+          'quente',
+          'calor',
+          'agua quente',
+          'água quente',
+          'oleo quente',
+          'óleo quente',
+          'panela',
+          'ferro',
+          'fogo',
+          'sol',
+        ],
       },
+
       {
         titulo: 'Medicamentos',
         descricao: 'Informações e cuidados relacionados a medicamentos.',
         rota: '/medicamentos',
         icone: 'pill' as const,
+        palavras: [
+          'medicamento',
+          'medicamentos',
+          'remedio',
+          'remédio',
+          'remedios',
+          'remédios',
+          'comprimido',
+          'comprimidos',
+          'medicacao',
+          'medicação',
+          'dose',
+          'dosagem',
+          'pilula',
+          'pílula',
+          'tomar remedio',
+          'tomei remedio',
+          'tomei remédio',
+        ],
       },
+
       {
         titulo: 'Picadas',
         descricao: 'Cuidados em situações envolvendo picadas.',
         rota: '/picadas',
         icone: 'bug-outline' as const,
+        palavras: [
+          'picada',
+          'picadas',
+          'picou',
+          'piquei',
+          'mordeu',
+          'mordida',
+          'inseto',
+          'insetos',
+          'abelha',
+          'vespa',
+          'marimbondo',
+          'mosquito',
+          'formiga',
+          'aranha',
+          'escorpiao',
+          'escorpião',
+          'animal',
+        ],
       },
     ];
 
     return itens.filter((item) => {
-      const titulo = item.titulo.toLowerCase();
-      const descricao = item.descricao.toLowerCase();
+      const palavrasNormalizadas = item.palavras.map((palavra) =>
+        palavra
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+      );
+
+      const tituloNormalizado = item.titulo
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+      const descricaoNormalizada = item.descricao
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
 
       return (
-        titulo.includes(texto) ||
-        descricao.includes(texto)
+        tituloNormalizado.includes(texto) ||
+        descricaoNormalizada.includes(texto) ||
+        palavrasNormalizadas.some((palavra) =>
+          palavra.includes(texto) || texto.includes(palavra)
+        )
       );
     });
   }, [textoBusca]);
@@ -71,10 +177,6 @@ export default function Index() {
     <SafeAreaView style={styles.container}>
       <View style={styles.screen}>
 
-        {/* =========================
-            CONTEÚDO QUE ROLA
-        ========================= */}
-
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.content}
@@ -82,7 +184,7 @@ export default function Index() {
         >
 
           {/* =========================
-              TOPO VERMELHO + ONDA + MALETA
+              TOPO
           ========================= */}
 
           <View style={styles.topSection}>
@@ -119,7 +221,7 @@ export default function Index() {
           </View>
 
           {/* =========================
-              TEXTO
+              CABEÇALHO
           ========================= */}
 
           <View style={styles.header}>
@@ -164,7 +266,7 @@ export default function Index() {
           </View>
 
           {/* =========================
-              RESULTADOS DA BUSCA
+              RESULTADOS
           ========================= */}
 
           {textoBusca.trim().length > 0 && (
@@ -175,6 +277,7 @@ export default function Index() {
               </Text>
 
               {resultados.length > 0 ? (
+
                 resultados.map((item) => (
                   <Pressable
                     key={item.titulo}
@@ -183,14 +286,17 @@ export default function Index() {
                   >
 
                     <View style={styles.resultadoIcone}>
+
                       <MaterialCommunityIcons
                         name={item.icone}
                         size={25}
                         color="#E52335"
                       />
+
                     </View>
 
                     <View style={styles.resultadoTexto}>
+
                       <Text style={styles.resultadoTitulo}>
                         {item.titulo}
                       </Text>
@@ -198,6 +304,7 @@ export default function Index() {
                       <Text style={styles.resultadoDescricao}>
                         {item.descricao}
                       </Text>
+
                     </View>
 
                     <Ionicons
@@ -208,8 +315,11 @@ export default function Index() {
 
                   </Pressable>
                 ))
+
               ) : (
+
                 <View style={styles.semResultado}>
+
                   <Ionicons
                     name="search-outline"
                     size={34}
@@ -223,7 +333,9 @@ export default function Index() {
                   <Text style={styles.semResultadoDescricao}>
                     Tente pesquisar por outro termo.
                   </Text>
+
                 </View>
+
               )}
 
             </View>
@@ -235,6 +347,7 @@ export default function Index() {
 
           {textoBusca.trim().length === 0 && (
             <>
+
               <View style={styles.categories}>
 
                 {/* FERIMENTOS */}
@@ -372,12 +485,10 @@ export default function Index() {
         </ScrollView>
 
         {/* =========================
-            MENU INFERIOR FIXO
+            MENU INFERIOR
         ========================= */}
 
         <View style={styles.bottomMenu}>
-
-          {/* INÍCIO */}
 
           <Pressable
             style={styles.menuItem}
@@ -400,8 +511,6 @@ export default function Index() {
 
           </Pressable>
 
-          {/* CATEGORIAS */}
-
           <Pressable
             style={styles.menuItem}
             onPress={() => router.push('/categorias')}
@@ -422,8 +531,6 @@ export default function Index() {
             </Text>
 
           </Pressable>
-
-          {/* CONFIGURAÇÃO */}
 
           <Pressable
             style={styles.menuItem}
@@ -455,10 +562,6 @@ export default function Index() {
 
 const styles = StyleSheet.create({
 
-  /* =========================
-     TELA
-  ========================= */
-
   container: {
     flex: 1,
     backgroundColor: '#F2F7FC',
@@ -468,17 +571,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  /* =========================
-     CONTEÚDO
-  ========================= */
-
   content: {
     paddingBottom: 125,
   },
-
-  /* =========================
-     TOPO VERMELHO
-  ========================= */
 
   topSection: {
     height: 155,
@@ -496,22 +591,14 @@ const styles = StyleSheet.create({
 
   medicalBag: {
     position: 'absolute',
-
     top: 25,
     right: 22,
-
     width: 95,
     height: 95,
-
     alignItems: 'center',
     justifyContent: 'center',
-
     opacity: 0.20,
   },
-
-  /* =========================
-     CABEÇALHO
-  ========================= */
 
   header: {
     paddingHorizontal: 24,
@@ -533,42 +620,25 @@ const styles = StyleSheet.create({
     color: '#53677D',
   },
 
-  /* =========================
-     PESQUISA
-  ========================= */
-
   searchContainer: {
     height: 62,
     marginHorizontal: 24,
-
     borderWidth: 1.5,
     borderColor: '#D9E0E8',
-
     borderRadius: 18,
-
     flexDirection: 'row',
     alignItems: 'center',
-
     paddingHorizontal: 16,
-
     backgroundColor: '#FFFFFF',
-
     marginBottom: 20,
   },
 
   searchInput: {
     flex: 1,
-
     marginLeft: 13,
-
     fontSize: 17,
-
     color: '#172337',
   },
-
-  /* =========================
-     RESULTADOS
-  ========================= */
 
   resultadosContainer: {
     marginHorizontal: 24,
@@ -584,19 +654,13 @@ const styles = StyleSheet.create({
 
   resultadoCard: {
     minHeight: 75,
-
     backgroundColor: '#FFFFFF',
-
     borderRadius: 16,
-
     marginBottom: 10,
-
     paddingHorizontal: 14,
     paddingVertical: 12,
-
     flexDirection: 'row',
     alignItems: 'center',
-
     borderWidth: 1,
     borderColor: '#E5EAF0',
   },
@@ -604,11 +668,8 @@ const styles = StyleSheet.create({
   resultadoIcone: {
     width: 48,
     height: 48,
-
     borderRadius: 14,
-
     backgroundColor: '#FFE9EC',
-
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -635,59 +696,40 @@ const styles = StyleSheet.create({
   semResultado: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
-
     paddingVertical: 28,
     paddingHorizontal: 20,
-
     alignItems: 'center',
   },
 
   semResultadoTitulo: {
     marginTop: 10,
-
     fontSize: 15,
     fontWeight: '800',
-
     color: '#53677D',
-
     textAlign: 'center',
   },
 
   semResultadoDescricao: {
     marginTop: 5,
-
     fontSize: 13,
-
     color: '#8799AA',
-
     textAlign: 'center',
   },
 
-  /* =========================
-     CATEGORIAS
-  ========================= */
-
   categories: {
     marginHorizontal: 24,
-
     flexDirection: 'row',
     flexWrap: 'wrap',
-
     justifyContent: 'space-between',
-
     rowGap: 16,
   },
 
   categoryCard: {
     width: '48%',
-
     height: 190,
-
     borderRadius: 22,
-
     alignItems: 'center',
     justifyContent: 'center',
-
     borderWidth: 1,
   },
 
@@ -718,31 +760,19 @@ const styles = StyleSheet.create({
 
   categoryText: {
     marginTop: 14,
-
     fontSize: 18,
-
     fontWeight: '700',
-
     color: '#172337',
   },
 
-  /* =========================
-     EMERGÊNCIA
-  ========================= */
-
   emergencyButton: {
     height: 125,
-
     backgroundColor: '#E52335',
-
     borderRadius: 18,
-
     marginTop: 30,
     marginHorizontal: 24,
-
     flexDirection: 'row',
     alignItems: 'center',
-
     paddingHorizontal: 18,
   },
 
@@ -758,77 +788,51 @@ const styles = StyleSheet.create({
 
   emergencyTitle: {
     color: '#FFFFFF',
-
     fontSize: 22,
-
     fontWeight: '800',
   },
 
   emergencySubtitle: {
     color: '#FFFFFF',
-
     fontSize: 15,
-
     fontWeight: '600',
-
     marginTop: 4,
   },
 
   arrowContainer: {
     width: 48,
     height: 48,
-
     borderRadius: 24,
-
     backgroundColor: '#FFFFFF',
-
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  /* =========================
-     MENU INFERIOR FIXO
-  ========================= */
-
   bottomMenu: {
     position: 'absolute',
-
     left: 12,
     right: 12,
     bottom: 10,
-
     height: 88,
-
     borderRadius: 24,
-
     backgroundColor: '#FFFFFF',
-
     flexDirection: 'row',
-
     justifyContent: 'space-around',
     alignItems: 'center',
-
     paddingBottom: 3,
-
     zIndex: 100,
-
     elevation: 100,
-
     shadowColor: '#000',
-
     shadowOffset: {
       width: 0,
       height: 3,
     },
-
     shadowOpacity: 0.10,
-
     shadowRadius: 8,
   },
 
   menuItem: {
     minWidth: 70,
-
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -836,20 +840,15 @@ const styles = StyleSheet.create({
   menuIcon: {
     width: 38,
     height: 32,
-
     alignItems: 'center',
     justifyContent: 'center',
-
     borderRadius: 16,
   },
 
   menuText: {
     marginTop: 5,
-
     fontSize: 12,
-
     fontWeight: '600',
-
     color: '#718096',
   },
 

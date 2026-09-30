@@ -17,13 +17,16 @@ import * as Location from 'expo-location';
 export default function Emergencia() {
   const router = useRouter();
 
-  const [localizacao, setLocalizacao] = useState<Location.LocationObject | null>(null);
-  const [carregandoLocalizacao, setCarregandoLocalizacao] = useState(false);
+  const [localizacao, setLocalizacao] =
+    useState<Location.LocationObject | null>(null);
+
+  const [carregandoLocalizacao, setCarregandoLocalizacao] =
+    useState(false);
 
   const ligar = (numero: string, nome: string) => {
     Alert.alert(
       `Ligar para ${nome}`,
-      `Deseja ligar para ${nome} (${numero})?`,
+      `Deseja ligar para ${numero}?`,
       [
         {
           text: 'Cancelar',
@@ -31,9 +34,7 @@ export default function Emergencia() {
         },
         {
           text: 'Ligar',
-          onPress: () => {
-            Linking.openURL(`tel:${numero}`);
-          },
+          onPress: () => Linking.openURL(`tel:${numero}`),
         },
       ]
     );
@@ -42,7 +43,7 @@ export default function Emergencia() {
   const abrirAjuda = () => {
     Alert.alert(
       'Preciso de ajuda',
-      'Escolha o serviço de emergência:',
+      'Escolha o serviço que você precisa:',
       [
         {
           text: 'SAMU — 192',
@@ -74,16 +75,17 @@ export default function Emergencia() {
       if (status !== 'granted') {
         Alert.alert(
           'Permissão necessária',
-          'Permita o acesso à localização para usar esta função.'
+          'Para encontrar sua localização, permita o acesso à localização nas configurações do celular.'
         );
         return;
       }
 
-      const local = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
+      const resultado =
+        await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
 
-      setLocalizacao(local);
+      setLocalizacao(resultado);
     } catch (error) {
       Alert.alert(
         'Erro',
@@ -98,7 +100,7 @@ export default function Emergencia() {
     if (!localizacao) {
       Alert.alert(
         'Localização não encontrada',
-        'Obtenha sua localização primeiro.'
+        'Primeiro obtenha sua localização.'
       );
       return;
     }
@@ -106,17 +108,21 @@ export default function Emergencia() {
     const latitude = localizacao.coords.latitude;
     const longitude = localizacao.coords.longitude;
 
-    const mapa =
+    const link =
       `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
 
     const mensagem =
-      `Preciso de ajuda.\n\nMinha localização:\n${mapa}`;
+      `🚨🆘 PRECISO DE AJUDA! 😰\n\n` +
+      `📍 Minha localização:\n${link}`;
 
     try {
       await Share.share({
         message: mensagem,
+        title: 'Enviar localização',
       });
     } catch (error) {
+      console.log('Erro ao compartilhar:', error);
+
       Alert.alert(
         'Erro',
         'Não foi possível abrir o compartilhamento.'
@@ -124,22 +130,10 @@ export default function Emergencia() {
     }
   };
 
-  const abrirMapa = () => {
-    if (!localizacao) return;
-
-    const latitude = localizacao.coords.latitude;
-    const longitude = localizacao.coords.longitude;
-
-    const mapa =
-      `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-
-    Linking.openURL(mapa);
-  };
-
   const mostrarInformacoes = () => {
     Alert.alert(
       'Informações para o socorro',
-      'Durante uma chamada de emergência, informe:\n\n' +
+      'Durante a ligação, tente informar:\n\n' +
         '• Onde você está\n' +
         '• O que aconteceu\n' +
         '• Quantas pessoas precisam de ajuda\n' +
@@ -156,7 +150,7 @@ export default function Emergencia() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.conteudo}
+        contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.topo}>
@@ -166,45 +160,48 @@ export default function Emergencia() {
           >
             <Ionicons
               name="arrow-back"
-              size={25}
-              color="#111"
+              size={24}
+              color="#111111"
             />
           </Pressable>
 
           <View>
-            <Text style={styles.titulo}>Emergência</Text>
+            <Text style={styles.titulo}>
+              Emergência
+            </Text>
+
             <Text style={styles.subtitulo}>
-              Ações rápidas quando você precisar
+              Acesso rápido quando você precisar.
             </Text>
           </View>
         </View>
 
         <Pressable
-          style={styles.cardAjuda}
+          style={styles.botaoAjuda}
           onPress={abrirAjuda}
         >
           <View style={styles.iconeAjuda}>
             <Ionicons
-              name="alert-circle"
-              size={32}
-              color="#fff"
+              name="call"
+              size={30}
+              color="#FFFFFF"
             />
           </View>
 
-          <View style={styles.textosAjuda}>
+          <View style={styles.textoAjuda}>
             <Text style={styles.tituloAjuda}>
               Preciso de ajuda
             </Text>
 
-            <Text style={styles.subtituloAjuda}>
-              Ligue rapidamente para um serviço de emergência
+            <Text style={styles.descricaoAjuda}>
+              Ligue rapidamente para um serviço de emergência.
             </Text>
           </View>
 
           <Ionicons
             name="chevron-forward"
             size={24}
-            color="#fff"
+            color="#FFFFFF"
           />
         </Pressable>
 
@@ -212,132 +209,119 @@ export default function Emergencia() {
           Ações rápidas
         </Text>
 
-        <View style={styles.card}>
-          <View style={styles.linhaTitulo}>
-            <View style={styles.icone}>
-              <Ionicons
-                name="location"
-                size={24}
-                color="#e53935"
-              />
-            </View>
-
-            <View style={styles.textos}>
-              <Text style={styles.tituloCard}>
-                Minha localização
-              </Text>
-
-              <Text style={styles.descricao}>
-                Encontre sua localização atual para informar ou enviar.
-              </Text>
-            </View>
+        <Pressable
+          style={styles.card}
+          onPress={obterLocalizacao}
+        >
+          <View style={styles.iconeCard}>
+            <Ionicons
+              name="location"
+              size={25}
+              color="#D62828"
+            />
           </View>
 
-          <Pressable
-            style={styles.botao}
-            onPress={obterLocalizacao}
-            disabled={carregandoLocalizacao}
-          >
-            <Ionicons
-              name="locate"
-              size={20}
-              color="#fff"
-            />
+          <View style={styles.infoCard}>
+            <Text style={styles.nomeCard}>
+              Minha localização
+            </Text>
 
-            <Text style={styles.textoBotao}>
+            <Text style={styles.descricaoCard}>
               {carregandoLocalizacao
                 ? 'Obtendo localização...'
-                : 'Obter minha localização'}
+                : localizacao
+                ? 'Localização encontrada.'
+                : 'Toque para encontrar sua localização.'}
             </Text>
-          </Pressable>
+          </View>
 
-          {localizacao && (
-            <View style={styles.localizacaoBox}>
+          <Ionicons
+            name="chevron-forward"
+            size={21}
+            color="#999999"
+          />
+        </Pressable>
+
+        {localizacao && (
+          <View style={styles.localizacaoBox}>
+            <View style={styles.localizacaoCabecalho}>
+              <Ionicons
+                name="checkmark-circle"
+                size={22}
+                color="#2E7D32"
+              />
+
               <Text style={styles.localizacaoTitulo}>
                 Localização encontrada
               </Text>
-
-              <Text style={styles.coordenadas}>
-                Latitude: {localizacao.coords.latitude.toFixed(6)}
-              </Text>
-
-              <Text style={styles.coordenadas}>
-                Longitude: {localizacao.coords.longitude.toFixed(6)}
-              </Text>
-
-              <Pressable
-                style={styles.botaoMapa}
-                onPress={abrirMapa}
-              >
-                <Ionicons
-                  name="map-outline"
-                  size={20}
-                  color="#e53935"
-                />
-
-                <Text style={styles.textoBotaoMapa}>
-                  Ver no mapa
-                </Text>
-              </Pressable>
-
-              <Pressable
-                style={styles.botaoEnviar}
-                onPress={compartilharLocalizacao}
-              >
-                <Ionicons
-                  name="share-outline"
-                  size={20}
-                  color="#fff"
-                />
-
-                <Text style={styles.textoBotaoEnviar}>
-                  Enviar localização
-                </Text>
-              </Pressable>
             </View>
-          )}
-        </View>
+
+            <Text style={styles.coordenadas}>
+              Latitude:{' '}
+              {localizacao.coords.latitude.toFixed(6)}
+            </Text>
+
+            <Text style={styles.coordenadas}>
+              Longitude:{' '}
+              {localizacao.coords.longitude.toFixed(6)}
+            </Text>
+
+            <Pressable
+              style={styles.botaoCompartilhar}
+              onPress={compartilharLocalizacao}
+            >
+              <Ionicons
+                name="share-social-outline"
+                size={20}
+                color="#FFFFFF"
+              />
+
+              <Text style={styles.textoCompartilhar}>
+                Enviar localização
+              </Text>
+            </Pressable>
+          </View>
+        )}
 
         <Pressable
           style={styles.card}
           onPress={mostrarInformacoes}
         >
-          <View style={styles.linhaTitulo}>
-            <View style={styles.icone}>
-              <Ionicons
-                name="information-circle"
-                size={25}
-                color="#e53935"
-              />
-            </View>
-
-            <View style={styles.textos}>
-              <Text style={styles.tituloCard}>
-                Informações para o socorro
-              </Text>
-
-              <Text style={styles.descricao}>
-                Veja o que é importante informar durante uma emergência.
-              </Text>
-            </View>
-
+          <View style={styles.iconeCard}>
             <Ionicons
-              name="chevron-forward"
-              size={22}
-              color="#999"
+              name="clipboard"
+              size={25}
+              color="#D62828"
             />
           </View>
+
+          <View style={styles.infoCard}>
+            <Text style={styles.nomeCard}>
+              Informações para o socorro
+            </Text>
+
+            <Text style={styles.descricaoCard}>
+              Saiba o que informar durante uma ligação.
+            </Text>
+          </View>
+
+          <Ionicons
+            name="chevron-forward"
+            size={21}
+            color="#999999"
+          />
         </Pressable>
 
         <View style={styles.aviso}>
           <Ionicons
-            name="warning-outline"
-            size={22}
-            color="#d98200"
+            name="information-circle-outline"
+            size={20}
+            color="#555555"
           />
 
-          <Text style={styles.textoAviso}>
-            Em uma emergência grave, procure ajuda imediatamente.
+          <Text style={styles.avisoTexto}>
+            Em uma emergência, procure ajuda profissional o
+            mais rápido possível.
           </Text>
         </View>
       </ScrollView>
@@ -348,10 +332,10 @@ export default function Emergencia() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f7f8fa',
+    backgroundColor: '#F7F8FA',
   },
 
-  conteudo: {
+  scroll: {
     padding: 20,
     paddingBottom: 35,
   },
@@ -359,33 +343,33 @@ const styles = StyleSheet.create({
   topo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 25,
+    marginBottom: 30,
   },
 
   botaoVoltar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#fff',
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
 
   titulo: {
-    fontSize: 27,
-    fontWeight: '800',
-    color: '#111',
+    fontSize: 23,
+    fontWeight: '700',
+    color: '#111111',
   },
 
   subtitulo: {
     fontSize: 14,
-    color: '#777',
-    marginTop: 3,
+    color: '#777777',
+    marginTop: 4,
   },
 
-  cardAjuda: {
-    backgroundColor: '#e53935',
+  botaoAjuda: {
+    backgroundColor: '#D62828',
     borderRadius: 20,
     padding: 18,
     flexDirection: 'row',
@@ -394,167 +378,134 @@ const styles = StyleSheet.create({
   },
 
   iconeAjuda: {
-    width: 55,
-    height: 55,
-    borderRadius: 28,
+    width: 54,
+    height: 54,
+    borderRadius: 17,
     backgroundColor: 'rgba(255,255,255,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 14,
   },
 
-  textosAjuda: {
+  textoAjuda: {
     flex: 1,
-    marginLeft: 14,
-    marginRight: 8,
   },
 
   tituloAjuda: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: '800',
+    color: '#FFFFFF',
   },
 
-  subtituloAjuda: {
-    color: '#fff',
+  descricaoAjuda: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: '#FFFFFF',
     opacity: 0.9,
-    fontSize: 13,
     marginTop: 4,
-    lineHeight: 18,
   },
 
   tituloSecao: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#111',
-    marginBottom: 12,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111111',
+    marginBottom: 13,
   },
 
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    padding: 18,
-    marginBottom: 14,
-  },
-
-  linhaTitulo: {
+    padding: 15,
+    marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
   },
 
-  icone: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    backgroundColor: '#fff1f1',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  textos: {
-    flex: 1,
-    marginLeft: 12,
-  },
-
-  tituloCard: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#111',
-  },
-
-  descricao: {
-    fontSize: 13,
-    color: '#777',
-    marginTop: 4,
-    lineHeight: 18,
-  },
-
-  botao: {
-    backgroundColor: '#e53935',
-    borderRadius: 12,
+  iconeCard: {
+    width: 48,
     height: 48,
-    marginTop: 16,
-    flexDirection: 'row',
+    borderRadius: 15,
+    backgroundColor: '#FFF0F0',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    marginRight: 13,
   },
 
-  textoBotao: {
-    color: '#fff',
-    fontSize: 15,
+  infoCard: {
+    flex: 1,
+  },
+
+  nomeCard: {
+    fontSize: 16,
     fontWeight: '700',
+    color: '#171717',
+  },
+
+  descricaoCard: {
+    fontSize: 12,
+    color: '#777777',
+    marginTop: 4,
+    lineHeight: 17,
   },
 
   localizacaoBox: {
-    backgroundColor: '#f7f8fa',
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
+    marginTop: -2,
+    marginBottom: 12,
+  },
+
+  localizacaoCabecalho: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
 
   localizacaoTitulo: {
     fontSize: 15,
-    fontWeight: '800',
-    color: '#111',
-    marginBottom: 8,
+    fontWeight: '700',
+    color: '#2E7D32',
+    marginLeft: 8,
   },
 
   coordenadas: {
     fontSize: 13,
-    color: '#666',
-    marginBottom: 3,
+    color: '#555555',
+    marginBottom: 4,
   },
 
-  botaoMapa: {
+  botaoCompartilhar: {
     height: 46,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e53935',
+    borderRadius: 14,
+    backgroundColor: '#D62828',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
   },
 
-  textoBotaoMapa: {
-    color: '#e53935',
-    fontSize: 15,
+  textoCompartilhar: {
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: '700',
-  },
-
-  botaoEnviar: {
-    height: 46,
-    borderRadius: 12,
-    backgroundColor: '#e53935',
-    marginTop: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-
-  textoBotaoEnviar: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
+    marginLeft: 8,
   },
 
   aviso: {
-    backgroundColor: '#fff8e8',
-    borderRadius: 14,
-    padding: 14,
     flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
+    alignItems: 'flex-start',
+    backgroundColor: '#EEEEEE',
+    borderRadius: 15,
+    padding: 14,
+    marginTop: 10,
   },
 
-  textoAviso: {
+  avisoTexto: {
     flex: 1,
-    marginLeft: 10,
-    color: '#795500',
-    fontSize: 13,
+    fontSize: 12,
     lineHeight: 18,
+    color: '#555555',
+    marginLeft: 9,
   },
 });
