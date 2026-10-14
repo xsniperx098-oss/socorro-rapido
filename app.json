@@ -33,7 +33,17 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Permita que o Socorro Rápido use o microfone para pesquisar por voz.",
+          "speechRecognitionPermission": "Permita que o Socorro Rápido reconheça sua fala para pesquisar por voz.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

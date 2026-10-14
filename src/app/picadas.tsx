@@ -109,7 +109,7 @@ export default function Picadas() {
             🐝 Atenção ao ferrão
           </Text>
 
-          <Lista text="" />
+          <Lista texto="" />
 
           <Text style={styles.texto}>
             Se houver um ferrão visível, procure orientação adequada

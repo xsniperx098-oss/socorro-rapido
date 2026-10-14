@@ -18,6 +18,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import * as SecureStore from 'expo-secure-store';
 
+const CONTA_DE_TESTE = {
+  email: 'teste@socorrorapido.app',
+  senha: 'Teste@12345',
+};
+
 export default function Login() {
   const router = useRouter();
 
@@ -64,6 +69,18 @@ export default function Login() {
       setCarregando(true);
 
       const emailFormatado = email.trim().toLowerCase();
+
+      // A conta de demonstração permite testar a navegação quando o serviço
+      // de autenticação ainda não está disponível. Ela não existe em builds
+      // de produção.
+      if (
+        __DEV__ &&
+        emailFormatado === CONTA_DE_TESTE.email &&
+        senha === CONTA_DE_TESTE.senha
+      ) {
+        router.replace('/tabs');
+        return;
+      }
 
       // LOGIN REAL PELO SUPABASE
       const { data, error } =

@@ -479,12 +479,12 @@ export default function Configuracao() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F2F7FC',
   },
 
   screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F2F7FC',
   },
 
   content: {

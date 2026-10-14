@@ -1,7 +1,7 @@
 // index.tsx
 
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -11,15 +11,125 @@ import {
   ScrollView,
   SafeAreaView,
   Image,
-  
+  Alert,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import Constants, { AppOwnership } from 'expo-constants';
 import Svg, { Path } from 'react-native-svg';
+
+type EventoResultadoVoz = {
+  results: Array<{ transcript?: string }>;
+};
+
+type EventoErroVoz = {
+  error?: string;
+  message?: string;
+};
+
+const executandoNoExpoGo = Constants.appOwnership === AppOwnership.Expo;
 
 export default function Index() {
   const router = useRouter();
 
   const [textoBusca, setTextoBusca] = useState('');
+  const [estaOuvindo, setEstaOuvindo] = useState(false);
+  const [reconhecimentoDisponivel, setReconhecimentoDisponivel] = useState(
+    !executandoNoExpoGo
+  );
+
+  useEffect(() => {
+    if (executandoNoExpoGo) {
+      return;
+    }
+
+    try {
+      // O Expo Go não inclui módulos nativos externos.
+      const { ExpoSpeechRecognitionModule } = require('expo-speech-recognition');
+
+      if (!ExpoSpeechRecognitionModule.isRecognitionAvailable()) {
+        setReconhecimentoDisponivel(false);
+        return;
+      }
+
+      const inscricoes = [
+        ExpoSpeechRecognitionModule.addListener('start', () => setEstaOuvindo(true)),
+        ExpoSpeechRecognitionModule.addListener('end', () => setEstaOuvindo(false)),
+        ExpoSpeechRecognitionModule.addListener('result', (event: EventoResultadoVoz) => {
+          const transcricao = event.results[0]?.transcript;
+
+          if (transcricao) {
+            setTextoBusca(transcricao);
+          }
+        }),
+        ExpoSpeechRecognitionModule.addListener('error', (event: EventoErroVoz) => {
+          setEstaOuvindo(false);
+
+          if (event.error !== 'aborted') {
+            Alert.alert(
+              'Não foi possível ouvir',
+              event.message || 'Verifique as permissões do microfone e tente novamente.'
+            );
+          }
+        }),
+      ];
+
+      return () => inscricoes.forEach((inscricao) => inscricao.remove());
+    } catch {
+      setReconhecimentoDisponivel(false);
+    }
+  }, []);
+
+  const alternarBuscaPorVoz = async () => {
+    if (!reconhecimentoDisponivel) {
+      Alert.alert(
+        'Busca por voz indisponível',
+        'Esse recurso estará disponível na versão instalada do aplicativo.'
+      );
+      return;
+    }
+
+    if (estaOuvindo) {
+      const { ExpoSpeechRecognitionModule } = require('expo-speech-recognition');
+      ExpoSpeechRecognitionModule.stop();
+      return;
+    }
+
+    try {
+      const { ExpoSpeechRecognitionModule } = require('expo-speech-recognition');
+
+      if (!ExpoSpeechRecognitionModule.isRecognitionAvailable()) {
+        Alert.alert(
+          'Reconhecimento indisponível',
+          'Este aparelho não possui um serviço de reconhecimento de voz disponível.'
+        );
+        return;
+      }
+
+      const permissao =
+        await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+
+      if (!permissao.granted) {
+        Alert.alert(
+          'Permissão necessária',
+          'Autorize o uso do microfone para pesquisar por voz.'
+        );
+        return;
+      }
+
+      ExpoSpeechRecognitionModule.start({
+        lang: 'pt-BR',
+        interimResults: true,
+        continuous: false,
+        maxAlternatives: 1,
+      });
+    } catch {
+      setEstaOuvindo(false);
+      Alert.alert(
+        'Não foi possível iniciar o microfone',
+        'Tente novamente após conceder as permissões necessárias.'
+      );
+    }
+  };
 
   // =========================
   // BUSCA INTELIGENTE
@@ -257,11 +367,20 @@ export default function Index() {
               returnKeyType="search"
             />
 
-            <Ionicons
-              name="mic-outline"
-              size={27}
-              color="#53677D"
-            />
+            <Pressable
+              onPress={alternarBuscaPorVoz}
+              accessibilityRole="button"
+              accessibilityLabel={
+                estaOuvindo ? 'Parar pesquisa por voz' : 'Pesquisar por voz'
+              }
+              hitSlop={10}
+            >
+              <Ionicons
+                name={estaOuvindo ? 'mic' : 'mic-outline'}
+                size={27}
+                color={estaOuvindo ? '#E52335' : '#53677D'}
+              />
+            </Pressable>
 
           </View>
 
