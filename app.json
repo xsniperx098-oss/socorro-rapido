@@ -1,23 +1,32 @@
 {
   "expo": {
-    "name": "MeuApp",
-    "slug": "MeuApp",
+    "name": "Socorro Rápido",
+    "slug": "socorro-rapido",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "meuapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.socorrorapido.app",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Permita que o Socorro Rápido reconheça sua fala para pesquisar por voz.",
+        "NSMicrophoneUsageDescription": "Permita que o Socorro Rápido use o microfone para pesquisar por voz."
+      }
     },
     "android": {
+      "package": "com.socorrorapido.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -48,6 +57,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b46f171f-d32d-43a3-841d-9a518ebd4cd3"
+      }
+    },
+    "owner": "sebasten"
   }
 }

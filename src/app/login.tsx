@@ -30,7 +30,7 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  // CARREGAR E-MAIL E SENHA SALVOS
+  // Carrega o e-mail e a senha salvos.
   useEffect(() => {
     const carregarDados = async () => {
       try {
@@ -55,9 +55,11 @@ export default function Login() {
     carregarDados();
   }, []);
 
-  // FAZER LOGIN
+  // Faz login com a conta informada.
   const fazerLogin = async () => {
-    if (!email || !senha) {
+    const emailFormatado = email.trim().toLowerCase();
+
+    if (!emailFormatado || !senha) {
       Alert.alert(
         'Atenção',
         'Digite seu e-mail e sua senha.'
@@ -65,10 +67,13 @@ export default function Login() {
       return;
     }
 
+    if (!/^\S+@\S+\.\S+$/.test(emailFormatado)) {
+      Alert.alert('E-mail inválido', 'Digite um endereço de e-mail válido.');
+      return;
+    }
+
     try {
       setCarregando(true);
-
-      const emailFormatado = email.trim().toLowerCase();
 
       // A conta de demonstração permite testar a navegação quando o serviço
       // de autenticação ainda não está disponível. Ela não existe em builds
@@ -82,7 +87,7 @@ export default function Login() {
         return;
       }
 
-      // LOGIN REAL PELO SUPABASE
+      // Login real pelo Supabase.
       const { data, error } =
         await supabase.auth.signInWithPassword({
           email: emailFormatado,
@@ -105,19 +110,18 @@ export default function Login() {
         return;
       }
 
-      // SALVAR E-MAIL PARA O PRÓXIMO LOGIN
+      // Salva os dados para o próximo login.
       await AsyncStorage.setItem(
         'emailSalvo',
         emailFormatado
       );
 
-      // SALVAR SENHA NO ARMAZENAMENTO SEGURO
       await SecureStore.setItemAsync(
         'senhaSalva',
         senha
       );
 
-      // ENTRAR NO APP
+      // Entra no app.
       router.replace('/tabs');
 
     } catch (error) {
@@ -132,7 +136,7 @@ export default function Login() {
     }
   };
 
-  // BOTÕES DE LOGIN SOCIAL
+  // Botões de login social.
   const loginSocial = (rede: string) => {
     Alert.alert(
       `${rede}`,
@@ -182,6 +186,10 @@ export default function Login() {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
             />
           </View>
 
@@ -200,6 +208,12 @@ export default function Login() {
               value={senha}
               onChangeText={setSenha}
               secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="password"
+              textContentType="password"
+              returnKeyType="done"
+              onSubmitEditing={fazerLogin}
             />
           </View>
 
