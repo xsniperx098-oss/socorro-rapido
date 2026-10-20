@@ -127,12 +127,7 @@ export default function Configuracao() {
 
             <Pressable
               style={styles.shortcut}
-              onPress={() =>
-                Alert.alert(
-                  'Editar perfil',
-                  'Tela em desenvolvimento.'
-                )
-              }
+              onPress={() => router.push('/editar-perfil')}
             >
               <View style={styles.shortcutCircle}>
                 <Ionicons
@@ -149,12 +144,7 @@ export default function Configuracao() {
 
             <Pressable
               style={styles.shortcut}
-              onPress={() =>
-                Alert.alert(
-                  'Notificações',
-                  'Tela em desenvolvimento.'
-                )
-              }
+              onPress={() => router.push('/notificacoes')}
             >
               <View style={styles.shortcutCircle}>
                 <Ionicons
@@ -239,12 +229,7 @@ export default function Configuracao() {
 
             <Pressable
               style={styles.option}
-              onPress={() =>
-                Alert.alert(
-                  'Notificações',
-                  'Tela em desenvolvimento.'
-                )
-              }
+              onPress={() => router.push('/notificacoes')}
             >
               <View style={styles.optionIcon}>
                 <Ionicons
